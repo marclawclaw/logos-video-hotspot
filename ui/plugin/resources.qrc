@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/qml">
         <file>qml/VideoHotspotApp.qml</file>
+        <file>qml/map.svg</file>
     </qresource>
 </RCC>

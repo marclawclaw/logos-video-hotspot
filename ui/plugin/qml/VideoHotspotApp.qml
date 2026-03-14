@@ -4,8 +4,9 @@
  * Tab order: Map → Upload → Downloads → Settings
  * Map is the default landing tab.
  *
- * Map uses a Canvas for crisp, resolution-independent rendering (no pixel
- * scaling artefacts). Timeline slider filters pin visibility by time value.
+ * Map is rendered as a vector SVG (map.svg) via Qt's Image item + Qt6 SVG
+ * image plugin.  SVG scales losslessly at any resolution — no pixelation.
+ * Timeline slider filters pin visibility by time value.
  */
 
 import QtQuick 2.15
@@ -193,144 +194,21 @@ Rectangle {
                     anchors.fill: parent
                     spacing: 0
 
-                    // ── Map area: Canvas background + pin overlay ──────────
+                    // ── Map area: SVG background + pin overlay ─────────────
                     Item {
                         id: mapArea
                         Layout.fillWidth: true
                         Layout.fillHeight: true
 
-                        // Vector map drawn on Canvas — renders at native DPI,
-                        // no pixel scaling artefacts.
-                        Canvas {
-                            id: mapCanvas
+                        // Vector map rendered from SVG — scales losslessly at
+                        // any resolution.  Requires qt6-svg-plugins at runtime.
+                        Image {
+                            id: mapImage
                             anchors.fill: parent
-
-                            // Repaint whenever the container is resized so
-                            // the map always fills at full resolution.
-                            onWidthChanged:  requestPaint()
-                            onHeightChanged: requestPaint()
-
-                            onPaint: {
-                                var ctx = getContext("2d")
-                                var w = width
-                                var h = height
-
-                                // ── Base terrain ──────────────────────────
-                                ctx.fillStyle = "#1c2b1c"
-                                ctx.fillRect(0, 0, w, h)
-
-                                // ── Tile grid (subtle, thin) ──────────────
-                                ctx.strokeStyle = "#243224"
-                                ctx.lineWidth = 0.5
-                                var tile = 80
-                                ctx.beginPath()
-                                for (var gx = 0; gx < w; gx += tile) {
-                                    ctx.moveTo(gx, 0); ctx.lineTo(gx, h)
-                                }
-                                for (var gy = 0; gy < h; gy += tile) {
-                                    ctx.moveTo(0, gy); ctx.lineTo(w, gy)
-                                }
-                                ctx.stroke()
-
-                                // ── Block fills (simulated city blocks) ───
-                                ctx.fillStyle = "#1e2e1e"
-                                var blocks = [
-                                    [0.10, 0.10, 0.18, 0.22],
-                                    [0.42, 0.12, 0.20, 0.18],
-                                    [0.68, 0.08, 0.14, 0.16],
-                                    [0.08, 0.50, 0.16, 0.20],
-                                    [0.44, 0.48, 0.18, 0.22],
-                                    [0.70, 0.58, 0.16, 0.18],
-                                    [0.20, 0.70, 0.22, 0.16],
-                                    [0.56, 0.74, 0.20, 0.14],
-                                ]
-                                for (var b = 0; b < blocks.length; b++) {
-                                    ctx.fillRect(blocks[b][0]*w, blocks[b][1]*h,
-                                                 blocks[b][2]*w, blocks[b][3]*h)
-                                }
-
-                                // ── Main roads ────────────────────────────
-                                ctx.strokeStyle = "#2e3e2e"
-                                ctx.lineWidth = 14
-                                ctx.lineCap = "round"
-                                // Vertical arterial
-                                ctx.beginPath()
-                                ctx.moveTo(w * 0.36, 0); ctx.lineTo(w * 0.36, h)
-                                ctx.stroke()
-                                // Horizontal arterial
-                                ctx.lineWidth = 10
-                                ctx.beginPath()
-                                ctx.moveTo(0, h * 0.36); ctx.lineTo(w, h * 0.36)
-                                ctx.stroke()
-
-                                // ── Secondary roads ───────────────────────
-                                ctx.strokeStyle = "#283828"
-                                ctx.lineWidth = 6
-                                ctx.beginPath()
-                                ctx.moveTo(w * 0.65, 0); ctx.lineTo(w * 0.65, h)
-                                ctx.stroke()
-                                ctx.beginPath()
-                                ctx.moveTo(0, h * 0.65); ctx.lineTo(w, h * 0.65)
-                                ctx.stroke()
-
-                                // ── Minor streets ─────────────────────────
-                                ctx.strokeStyle = "#243024"
-                                ctx.lineWidth = 2
-                                var minorX = [0.12, 0.28, 0.50, 0.76, 0.90]
-                                var minorY = [0.20, 0.50, 0.80]
-                                ctx.beginPath()
-                                for (var mx = 0; mx < minorX.length; mx++) {
-                                    ctx.moveTo(minorX[mx]*w, 0)
-                                    ctx.lineTo(minorX[mx]*w, h)
-                                }
-                                for (var my = 0; my < minorY.length; my++) {
-                                    ctx.moveTo(0, minorY[my]*h)
-                                    ctx.lineTo(w, minorY[my]*h)
-                                }
-                                ctx.stroke()
-
-                                // ── Road centre-lines (dashed yellow) ─────
-                                ctx.strokeStyle = "#3a4a1a"
-                                ctx.lineWidth = 1
-                                ctx.setLineDash([8, 12])
-                                ctx.beginPath()
-                                ctx.moveTo(w * 0.36, 0); ctx.lineTo(w * 0.36, h)
-                                ctx.stroke()
-                                ctx.beginPath()
-                                ctx.moveTo(0, h * 0.36); ctx.lineTo(w, h * 0.36)
-                                ctx.stroke()
-                                ctx.setLineDash([])
-
-                                // ── Zoom controls (drawn on canvas corner) ─
-                                ctx.fillStyle = "#2a2a2a"
-                                ctx.strokeStyle = "#444444"
-                                ctx.lineWidth = 1
-                                roundRect(ctx, w-44, 16, 28, 28, 4)
-                                ctx.fill(); ctx.stroke()
-                                roundRect(ctx, w-44, 52, 28, 28, 4)
-                                ctx.fill(); ctx.stroke()
-                                ctx.fillStyle = "#f0f0f0"
-                                ctx.font = "bold 18px sans-serif"
-                                ctx.textAlign = "center"
-                                ctx.textBaseline = "middle"
-                                ctx.fillText("+", w-30, 30)
-                                ctx.fillText("−", w-30, 66)
-                            }
-
-                            // Helper: rounded rectangle path
-                            function roundRect(ctx, x, y, w, h, r) {
-                                ctx.beginPath()
-                                ctx.moveTo(x+r, y)
-                                ctx.lineTo(x+w-r, y)
-                                ctx.arcTo(x+w, y,   x+w, y+r,   r)
-                                ctx.lineTo(x+w, y+h-r)
-                                ctx.arcTo(x+w, y+h, x+w-r, y+h, r)
-                                ctx.lineTo(x+r, y+h)
-                                ctx.arcTo(x, y+h,   x, y+h-r,   r)
-                                ctx.lineTo(x, y+r)
-                                ctx.arcTo(x, y,     x+r, y,      r)
-                                ctx.closePath()
-                            }
+                            source: "qrc:/qml/qml/map.svg"
+                            fillMode: Image.Stretch
+                            smooth: true
+                            antialiasing: true
                         }
 
                         // ── Video pin overlay ──────────────────────────────

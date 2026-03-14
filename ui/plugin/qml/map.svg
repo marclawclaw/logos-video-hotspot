@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 660" width="1280" height="660">
+  <defs>
+    <style>
+      .water { fill: #1a3a52; }
+      .land  { fill: #252f25; }
+      .park  { fill: #1d3d1d; }
+      .block { fill: #323230; }
+      .block-dense { fill: #3a3a38; }
+      .road-hwy  { stroke: #6a6a30; stroke-width: 14; fill: none; stroke-linecap: round; }
+      .road-art  { stroke: #555550; stroke-width: 9;  fill: none; stroke-linecap: round; }
+      .road-sec  { stroke: #454540; stroke-width: 5;  fill: none; stroke-linecap: round; }
+      .road-str  { stroke: #383830; stroke-width: 2;  fill: none; }
+      .road-hwy-cl { stroke: #8a7a20; stroke-width: 1.5; fill: none; stroke-dasharray: 12,10; }
+      .road-art-cl { stroke: #505040; stroke-width: 0.8; fill: none; stroke-dasharray: 8,8; }
+      .label-district { fill: #607060; font-family: sans-serif; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+      .label-road { fill: #555548; font-family: sans-serif; font-size: 9px; }
+      .label-water { fill: #2a5a7a; font-family: sans-serif; font-size: 13px; font-style: italic; }
+      .bridge { stroke: #6a6040; stroke-width: 10; fill: none; }
+      .bridge-rail { stroke: #555540; stroke-width: 2; fill: none; stroke-dasharray: 5,3; }
+    </style>
+    <!-- Drop shadow for pins -->
+    <filter id="pin-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ── Water / Ocean background ───────────────────────────────────────── -->
+  <rect width="1280" height="660" class="water"/>
+
+  <!-- Subtle wave pattern on water -->
+  <g opacity="0.15" stroke="#2a6088" stroke-width="0.8" fill="none">
+    <path d="M 0,480 Q 80,474 160,480 Q 240,486 320,480 Q 400,474 480,480 Q 560,486 640,480 Q 720,474 800,480 Q 880,486 960,480 Q 1040,474 1120,480 Q 1200,486 1280,480"/>
+    <path d="M 0,496 Q 80,490 160,496 Q 240,502 320,496 Q 400,490 480,496 Q 560,502 640,496 Q 720,490 800,496 Q 880,502 960,496 Q 1040,490 1120,496 Q 1200,502 1280,496"/>
+    <path d="M 0,512 Q 80,506 160,512 Q 240,518 320,512 Q 400,506 480,512 Q 560,518 640,512 Q 720,506 800,512 Q 880,518 960,512 Q 1040,506 1120,512 Q 1200,518 1280,512"/>
+    <path d="M 0,528 Q 80,522 160,528 Q 240,534 320,528 Q 400,522 480,528 Q 560,534 640,528 Q 720,522 800,528 Q 880,534 960,528 Q 1040,522 1120,528 Q 1200,534 1280,528"/>
+    <path d="M 0,544 Q 80,538 160,544 Q 240,550 320,544 Q 400,538 480,544 Q 560,550 640,544 Q 720,538 800,544 Q 880,550 960,544 Q 1040,538 1120,544 Q 1200,550 1280,544"/>
+  </g>
+
+  <!-- ── Main land mass ──────────────────────────────────────────────────── -->
+  <!-- Upper land (mainland + north shore) -->
+  <polygon class="land" points="
+    0,0
+    1280,0
+    1280,480
+    1100,490
+    1020,470
+    940,460
+    880,440
+    820,430
+    760,420
+    700,430
+    650,450
+    600,460
+    540,470
+    480,480
+    420,490
+    360,500
+    320,510
+    280,520
+    240,510
+    200,500
+    160,490
+    120,480
+    80,470
+    40,460
+    0,450
+  "/>
+
+  <!-- Harbour inlet -->
+  <polygon class="water" points="
+    300,320
+    400,290
+    500,280
+    600,290
+    700,310
+    760,340
+    780,380
+    740,400
+    680,410
+    600,420
+    520,430
+    440,440
+    380,450
+    320,460
+    280,440
+    260,400
+    270,360
+  "/>
+
+  <!-- River inlet left -->
+  <polygon class="water" points="
+    0,380
+    60,370
+    120,360
+    150,340
+    140,310
+    100,300
+    60,310
+    20,320
+    0,340
+  "/>
+
+  <!-- Lower land (peninsula / waterfront) -->
+  <polygon class="land" points="
+    380,450
+    440,440
+    510,435
+    560,430
+    600,420
+    680,410
+    740,400
+    760,390
+    740,420
+    700,440
+    640,460
+    580,470
+    520,475
+    460,480
+    400,490
+    360,500
+    320,510
+    290,520
+    270,530
+    280,570
+    320,590
+    380,600
+    450,610
+    520,615
+    580,610
+    620,600
+    650,580
+    640,560
+    620,550
+    600,540
+    580,540
+    560,550
+    540,560
+    520,560
+    500,550
+    490,530
+    500,510
+    520,500
+    560,490
+    600,480
+    650,470
+    700,460
+    760,450
+    820,440
+    880,440
+    940,460
+    1020,470
+    1100,490
+    1280,480
+    1280,660
+    0,660
+    0,570
+    40,550
+    80,540
+    120,530
+    160,520
+    200,510
+    240,520
+    280,530
+    300,540
+    310,560
+    290,580
+    270,600
+    260,630
+    270,650
+    260,660
+  "/>
+
+  <!-- ── Park areas ─────────────────────────────────────────────────────── -->
+  <rect class="park" x="820" y="30" width="200" height="160" rx="8"/>
+  <!-- Park texture (subtle grid of dots) -->
+  <g opacity="0.3" fill="#2a5a2a">
+    <circle cx="840" cy="50" r="2"/> <circle cx="870" cy="50" r="2"/> <circle cx="900" cy="50" r="2"/>
+    <circle cx="930" cy="50" r="2"/> <circle cx="960" cy="50" r="2"/> <circle cx="990" cy="50" r="2"/>
+    <circle cx="840" cy="80" r="2"/> <circle cx="870" cy="80" r="2"/> <circle cx="900" cy="80" r="2"/>
+    <circle cx="930" cy="80" r="2"/> <circle cx="960" cy="80" r="2"/> <circle cx="990" cy="80" r="2"/>
+    <circle cx="840" cy="110" r="2"/> <circle cx="870" cy="110" r="2"/> <circle cx="900" cy="110" r="2"/>
+    <circle cx="930" cy="110" r="2"/> <circle cx="960" cy="110" r="2"/> <circle cx="990" cy="110" r="2"/>
+    <circle cx="840" cy="140" r="2"/> <circle cx="870" cy="140" r="2"/> <circle cx="900" cy="140" r="2"/>
+    <circle cx="930" cy="140" r="2"/> <circle cx="960" cy="140" r="2"/> <circle cx="990" cy="140" r="2"/>
+    <circle cx="840" cy="170" r="2"/> <circle cx="870" cy="170" r="2"/> <circle cx="900" cy="170" r="2"/>
+  </g>
+
+  <!-- Small park upper-left -->
+  <rect class="park" x="50" y="40" width="100" height="80" rx="6"/>
+
+  <!-- Waterfront park -->
+  <rect class="park" x="430" y="490" width="120" height="60" rx="4"/>
+
+  <!-- ── City blocks — CBD (dense) ─────────────────────────────────────── -->
+  <!-- CBD grid: lower-center around 380-560, 220-380 -->
+  <g class="block-dense">
+    <rect x="388" y="228" width="42" height="34" rx="2"/>
+    <rect x="438" y="228" width="36" height="34" rx="2"/>
+    <rect x="482" y="228" width="40" height="34" rx="2"/>
+    <rect x="388" y="270" width="42" height="36" rx="2"/>
+    <rect x="438" y="270" width="36" height="36" rx="2"/>
+    <rect x="482" y="270" width="40" height="36" rx="2"/>
+    <rect x="388" y="314" width="42" height="34" rx="2"/>
+    <rect x="438" y="314" width="36" height="34" rx="2"/>
+    <rect x="482" y="314" width="40" height="34" rx="2"/>
+    <rect x="388" y="356" width="42" height="34" rx="2"/>
+    <rect x="438" y="356" width="36" height="34" rx="2"/>
+    <rect x="482" y="356" width="40" height="34" rx="2"/>
+  </g>
+
+  <!-- Mid-density blocks — north shore area -->
+  <g class="block">
+    <rect x="100" y="50" width="50" height="40" rx="2"/>
+    <rect x="158" y="50" width="46" height="40" rx="2"/>
+    <rect x="100" y="98" width="50" height="38" rx="2"/>
+    <rect x="158" y="98" width="46" height="38" rx="2"/>
+    <rect x="100" y="144" width="50" height="40" rx="2"/>
+    <rect x="158" y="144" width="46" height="40" rx="2"/>
+
+    <!-- Inner-west -->
+    <rect x="240" y="60" width="54" height="42" rx="2"/>
+    <rect x="302" y="60" width="50" height="42" rx="2"/>
+    <rect x="240" y="110" width="54" height="40" rx="2"/>
+    <rect x="302" y="110" width="50" height="40" rx="2"/>
+    <rect x="240" y="158" width="54" height="44" rx="2"/>
+    <rect x="302" y="158" width="50" height="44" rx="2"/>
+
+    <!-- East suburbs -->
+    <rect x="620" y="55" width="60" height="44" rx="2"/>
+    <rect x="688" y="55" width="55" height="44" rx="2"/>
+    <rect x="620" y="107" width="60" height="42" rx="2"/>
+    <rect x="688" y="107" width="55" height="42" rx="2"/>
+    <rect x="620" y="157" width="60" height="44" rx="2"/>
+    <rect x="688" y="157" width="55" height="44" rx="2"/>
+
+    <!-- Harbour fringe -->
+    <rect x="540" y="228" width="46" height="34" rx="2"/>
+    <rect x="594" y="228" width="42" height="34" rx="2"/>
+    <rect x="540" y="270" width="46" height="36" rx="2"/>
+    <rect x="594" y="270" width="42" height="36" rx="2"/>
+    <rect x="540" y="314" width="46" height="34" rx="2"/>
+    <rect x="594" y="314" width="42" height="34" rx="2"/>
+    <rect x="540" y="356" width="46" height="34" rx="2"/>
+    <rect x="594" y="356" width="42" height="34" rx="2"/>
+
+    <!-- West side -->
+    <rect x="64" y="180" width="52" height="42" rx="2"/>
+    <rect x="124" y="180" width="50" height="42" rx="2"/>
+    <rect x="64" y="230" width="52" height="42" rx="2"/>
+    <rect x="124" y="230" width="50" height="42" rx="2"/>
+    <rect x="64" y="280" width="52" height="42" rx="2"/>
+    <rect x="124" y="280" width="50" height="42" rx="2"/>
+
+    <!-- Northern distant suburb -->
+    <rect x="760" y="30" width="50" height="36" rx="2"/>
+    <rect x="818" y="30" width="46" height="36" rx="2"/>  <!-- partly in park, ok -->
+
+    <!-- Southern waterfront -->
+    <rect x="350" y="480" width="54" height="36" rx="2"/>
+    <rect x="300" y="540" width="50" height="34" rx="2"/>
+    <rect x="360" y="548" width="48" height="34" rx="2"/>
+    <rect x="414" y="556" width="46" height="32" rx="2"/>
+  </g>
+
+  <!-- ── Highway / Freeway network ────────────────────────────────────────── -->
+  <!-- Western freeway (top to bottom) -->
+  <path class="road-hwy" d="M 180,0 L 200,80 L 210,160 L 220,240 L 230,320 L 240,400 L 250,460 L 260,520 L 270,600 L 272,660"/>
+  <!-- Harbour bridge -->
+  <path class="bridge" d="M 310,340 Q 340,310 370,290 Q 410,265 450,260"/>
+  <!-- Bridge hangers (vertical lines) -->
+  <g stroke="#6a5a30" stroke-width="1" opacity="0.6">
+    <line x1="315" y1="340" x2="318" y2="300"/>
+    <line x1="325" y1="332" x2="329" y2="292"/>
+    <line x1="336" y1="324" x2="341" y2="284"/>
+    <line x1="348" y1="315" x2="354" y2="275"/>
+    <line x1="362" y1="305" x2="369" y2="265"/>
+    <line x1="376" y1="294" x2="384" y2="275"/>
+    <line x1="392" y1="284" x2="400" y2="266"/>
+    <line x1="408" y1="276" x2="416" y2="260"/>
+    <line x1="424" y1="269" x2="432" y2="260"/>
+    <line x1="440" y1="263" x2="448" y2="260"/>
+  </g>
+  <!-- Eastern expressway -->
+  <path class="road-hwy" d="M 700,0 L 710,80 L 720,160 L 730,240 L 740,320 L 750,400 L 755,460 L 758,530"/>
+  <!-- Cross-harbour tunnel (dashed underground) -->
+  <path stroke="#6a6a30" stroke-width="5" fill="none" stroke-dasharray="10,8" opacity="0.4"
+        d="M 370,400 Q 400,370 440,355 Q 480,342 520,348 Q 560,355 600,370 L 640,400"/>
+
+  <!-- Freeway centre-lines -->
+  <path class="road-hwy-cl" d="M 180,0 L 200,80 L 210,160 L 220,240 L 230,320 L 240,400 L 250,460 L 260,520 L 270,600 L 272,660"/>
+  <path class="road-hwy-cl" d="M 700,0 L 710,80 L 720,160 L 730,240 L 740,320 L 750,400 L 755,460"/>
+
+  <!-- ── Major arterial roads ────────────────────────────────────────────── -->
+  <!-- Horizontal arterials -->
+  <path class="road-art" d="M 0,100 L 1280,100"/>
+  <path class="road-art" d="M 0,220 L 200,220 L 220,230 L 700,230 L 730,230 L 1280,230"/>
+  <path class="road-art" d="M 0,350 L 250,350 L 280,355 L 700,355 L 730,355 L 1280,350"/>
+  <path class="road-art" d="M 0,430 L 200,430 L 220,440 L 600,450 L 700,455 L 1280,450"/>
+
+  <!-- Vertical arterials -->
+  <path class="road-art" d="M 370,0 L 370,200 L 375,220 L 380,400 L 385,450 L 390,530 L 400,600 L 410,660"/>
+  <path class="road-art" d="M 530,0 L 530,150 L 535,220 L 540,380 L 545,450 L 550,520 L 555,620 L 558,660"/>
+  <path class="road-art" d="M 650,0 L 655,100 L 660,200 L 665,320 L 670,400 L 675,460 L 680,530 L 685,660"/>
+
+  <!-- Arterial centre-lines -->
+  <path class="road-art-cl" d="M 0,100 L 1280,100"/>
+  <path class="road-art-cl" d="M 0,220 L 1280,230"/>
+  <path class="road-art-cl" d="M 0,350 L 1280,350"/>
+  <path class="road-art-cl" d="M 370,0 L 410,660"/>
+  <path class="road-art-cl" d="M 530,0 L 558,660"/>
+  <path class="road-art-cl" d="M 650,0 L 685,660"/>
+
+  <!-- ── Secondary roads ────────────────────────────────────────────────── -->
+  <!-- Additional horizontal secondaries -->
+  <path class="road-sec" d="M 0,50  L 1280,50"/>
+  <path class="road-sec" d="M 0,160 L 1280,160"/>
+  <path class="road-sec" d="M 0,290 L 380,290 L 400,292 L 700,292 L 730,290 L 1280,290"/>
+  <path class="road-sec" d="M 0,400 L 1280,400"/>
+  <path class="road-sec" d="M 0,480 L 260,480 L 290,488 L 500,495 L 700,490 L 1280,480"/>
+  <path class="road-sec" d="M 0,560 L 1280,560"/>
+
+  <!-- Additional vertical secondaries -->
+  <path class="road-sec" d="M 80,0 L 80,440 L 85,480 L 90,560 L 92,660"/>
+  <path class="road-sec" d="M 460,0 L 462,200 L 464,300 L 466,400 L 468,500 L 470,660"/>
+  <path class="road-sec" d="M 610,0 L 612,150 L 614,300 L 616,420 L 618,560 L 620,660"/>
+  <path class="road-sec" d="M 770,0 L 770,160 L 775,300 L 778,420 L 780,560 L 782,660"/>
+  <path class="road-sec" d="M 960,0 L 960,160 L 960,300 L 960,440 L 960,560 L 960,660"/>
+  <path class="road-sec" d="M 1100,0 L 1100,160 L 1100,300 L 1100,440 L 1100,560 L 1100,660"/>
+
+  <!-- ── Minor street grid (CBD) ────────────────────────────────────────── -->
+  <g class="road-str">
+    <!-- CBD mini-streets horizontal -->
+    <line x1="370" y1="264" x2="650" y2="264"/>
+    <line x1="370" y1="308" x2="650" y2="308"/>
+    <line x1="370" y1="352" x2="650" y2="352"/>
+    <!-- CBD mini-streets vertical -->
+    <line x1="428" y1="220" x2="428" y2="400"/>
+    <line x1="480" y1="220" x2="480" y2="400"/>
+    <line x1="530" y1="220" x2="532" y2="400"/>
+    <line x1="590" y1="220" x2="592" y2="400"/>
+    <line x1="638" y1="220" x2="640" y2="400"/>
+    <!-- North shore streets -->
+    <line x1="80" y1="130" x2="370" y2="130"/>
+    <line x1="140" y1="0" x2="140" y2="220"/>
+    <line x1="210" y1="0" x2="210" y2="160"/>
+    <line x1="310" y1="0" x2="310" y2="220"/>
+    <!-- East streets -->
+    <line x1="700" y1="130" x2="960" y2="130"/>
+    <line x1="700" y1="195" x2="960" y2="195"/>
+    <line x1="840" y1="0" x2="840" y2="290"/>
+    <line x1="900" y1="0" x2="900" y2="290"/>
+  </g>
+
+  <!-- ── Waterfront elements ────────────────────────────────────────────── -->
+  <!-- Pier / wharf structures -->
+  <rect fill="#3a3a30" x="430" y="445" width="60" height="12" rx="2"/>
+  <rect fill="#3a3a30" x="510" y="452" width="50" height="10" rx="2"/>
+  <rect fill="#3a3a30" x="590" y="445" width="45" height="12" rx="2"/>
+
+  <!-- Ferry terminal -->
+  <rect fill="#404040" x="480" y="430" width="40" height="16" rx="3"/>
+  <rect fill="#505048" x="484" y="434" width="32" height="8" rx="2"/>
+
+  <!-- ── District labels ────────────────────────────────────────────────── -->
+  <text class="label-district" x="100" y="78" transform="rotate(-2,100,78)">NORTH SHORE</text>
+  <text class="label-district" x="270" y="88">INNER WEST</text>
+  <text class="label-district" x="430" y="296">CBD</text>
+  <text class="label-district" x="580" y="170">EAST</text>
+  <text class="label-district" x="660" y="90">EASTERN SUBURBS</text>
+  <text class="label-district" x="835" y="65">RESERVE PARK</text>
+  <text class="label-district" x="960" y="170">OUTER EAST</text>
+  <text class="label-district" x="1090" y="170">FAR EAST</text>
+  <text class="label-district" x="100" y="280">WEST END</text>
+  <text class="label-district" x="800" y="330">SOUTH EAST</text>
+
+  <!-- Road name labels -->
+  <text class="label-road" x="600" y="218" transform="rotate(0,600,218)">GEORGE ST</text>
+  <text class="label-road" x="370" y="96" transform="rotate(-90,370,96)">PITT ST</text>
+  <text class="label-road" x="100" y="96">PACIFIC HWY</text>
+  <text class="label-road" x="650" y="96">EASTERN AVE</text>
+  <text class="label-road" x="100" y="346">VICTORIA RD</text>
+
+  <!-- Water label -->
+  <text class="label-water" x="350" y="400" transform="rotate(-8,350,400)">HARBOUR</text>
+  <text class="label-water" x="80" y="340" transform="rotate(-10,80,340)">BAY</text>
+  <text class="label-water" x="500" y="600">INNER BAY</text>
+  <text class="label-water" x="800" y="590">SOUTH HARBOUR</text>
+
+  <!-- ── Grid overlay (very subtle) ────────────────────────────────────── -->
+  <g opacity="0.04" stroke="#ffffff" stroke-width="0.5" fill="none">
+    <line x1="0" y1="66" x2="1280" y2="66"/>
+    <line x1="0" y1="132" x2="1280" y2="132"/>
+    <line x1="0" y1="198" x2="1280" y2="198"/>
+    <line x1="0" y1="264" x2="1280" y2="264"/>
+    <line x1="0" y1="330" x2="1280" y2="330"/>
+    <line x1="0" y1="396" x2="1280" y2="396"/>
+    <line x1="0" y1="462" x2="1280" y2="462"/>
+    <line x1="0" y1="528" x2="1280" y2="528"/>
+    <line x1="0" y1="594" x2="1280" y2="594"/>
+    <line x1="64" y1="0"  x2="64" y2="660"/>
+    <line x1="128" y1="0" x2="128" y2="660"/>
+    <line x1="192" y1="0" x2="192" y2="660"/>
+    <line x1="256" y1="0" x2="256" y2="660"/>
+    <line x1="320" y1="0" x2="320" y2="660"/>
+    <line x1="384" y1="0" x2="384" y2="660"/>
+    <line x1="448" y1="0" x2="448" y2="660"/>
+    <line x1="512" y1="0" x2="512" y2="660"/>
+    <line x1="576" y1="0" x2="576" y2="660"/>
+    <line x1="640" y1="0" x2="640" y2="660"/>
+    <line x1="704" y1="0" x2="704" y2="660"/>
+    <line x1="768" y1="0" x2="768" y2="660"/>
+    <line x1="832" y1="0" x2="832" y2="660"/>
+    <line x1="896" y1="0" x2="896" y2="660"/>
+    <line x1="960" y1="0" x2="960" y2="660"/>
+    <line x1="1024" y1="0" x2="1024" y2="660"/>
+    <line x1="1088" y1="0" x2="1088" y2="660"/>
+    <line x1="1152" y1="0" x2="1152" y2="660"/>
+    <line x1="1216" y1="0" x2="1216" y2="660"/>
+  </g>
+
+  <!-- ── Compass rose ───────────────────────────────────────────────────── -->
+  <g transform="translate(1220,590)">
+    <circle r="22" fill="#1e2e1e" stroke="#404040" stroke-width="1.5"/>
+    <!-- N arrow -->
+    <polygon points="0,-16  4,-4  0,-8  -4,-4" fill="#888888"/>
+    <polygon points="0,-16 -4,-4  0,-8   4,-4" fill="#555555"/>
+    <!-- S arrow -->
+    <polygon points="0,16  4,4  0,8  -4,4" fill="#555555"/>
+    <text y="4" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#888888">N</text>
+  </g>
+
+  <!-- ── Scale bar ──────────────────────────────────────────────────────── -->
+  <g transform="translate(40,620)">
+    <rect x="0" y="0" width="100" height="6" fill="none" stroke="#555555" stroke-width="1"/>
+    <rect x="0" y="0" width="50" height="6" fill="#555555"/>
+    <text x="0" y="20" font-family="sans-serif" font-size="9" fill="#555555">0</text>
+    <text x="44" y="20" font-family="sans-serif" font-size="9" fill="#555555">500m</text>
+    <text x="90" y="20" font-family="sans-serif" font-size="9" fill="#555555">1km</text>
+  </g>
+
+  <!-- ── Zoom controls (top-right corner, matching UI) ─────────────────── -->
+  <g transform="translate(1236,16)">
+    <rect width="28" height="28" rx="4" fill="#2a2a2a" stroke="#444444" stroke-width="1"/>
+    <text x="14" y="20" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="bold" fill="#f0f0f0">+</text>
+  </g>
+  <g transform="translate(1236,52)">
+    <rect width="28" height="28" rx="4" fill="#2a2a2a" stroke="#444444" stroke-width="1"/>
+    <text x="14" y="20" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="bold" fill="#f0f0f0">−</text>
+  </g>
+</svg>

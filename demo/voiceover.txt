@@ -1,0 +1,28 @@
+# Video Hotspot — GUI Demo Voiceover Script
+# Format: timestamp - "line" [duration_hint]
+# Generated with: espeak-ng -s 140 -v en-us
+
+0:00 - "Welcome to Video Hotspot — a decentralised video sharing app built on the Logos stack."
+0:05 - "The Map tab shows geotagged video pins published to the Logos network."
+0:10 - "Each coloured pin marks a video with GPS coordinates — five clips visible here."
+0:15 - "Use the timeline slider to filter videos by time period."
+0:20 - "Dragging left narrows the window — older pins fade out."
+0:26 - "Dragging right brings all pins back into view."
+0:31 - "Pins respond with a smooth opacity transition as the time window changes."
+0:36 - "Now let's switch to the Upload tab to see the decentralised upload flow."
+0:41 - "Click Upload File to queue a video for publishing to the Logos network."
+0:47 - "Each file gets a progress bar as it's chunked and distributed across nodes."
+0:53 - "Let's add a second file."
+0:57 - "And a third — the queue fills up with live progress tracking."
+1:02 - "Click Upload Folder to batch-add an entire directory in one go."
+1:08 - "Three folder clips are added simultaneously — the queue grows automatically."
+1:14 - "Now watch what happens when we try to upload a file that's already in the queue."
+1:20 - "The deduplication engine detects the match and flags it with a DUPLICATE badge — no wasted bandwidth."
+1:27 - "Switching to the Downloads tab shows your local cache and owned videos."
+1:33 - "Storage usage is tracked against your configured limit — here twelve percent used."
+1:39 - "The Settings tab lets you tune storage limits, watched folders, and node connectivity."
+1:45 - "Auto-monitoring is enabled — new files dropped into the watched folder are queued instantly."
+1:51 - "The Logos node shows connected status — in production this links to a real network peer."
+1:57 - "Back on the Map — Video Hotspot gives communities a censorship-resistant way to share video evidence."
+2:03 - "Built on Waku for messaging, Codex for storage, and Nomos for consensus — fully on the Logos stack."
+2:10 - "Thank you for watching."
