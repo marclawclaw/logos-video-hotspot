@@ -1,14 +1,14 @@
 # Video Hotspot — FURPS Specification
 
-> **Privacy-preserving video capture and geolocation-based event clustering on the Logos stack**
+> **Privacy-preserving video upload and geolocation-based event mapping on the Logos stack**
 
 ## Overview
 
-Video Hotspot is a desktop application for capturing, uploading, and collectively mapping events through video footage. Users can record and upload video clips that are automatically tagged with timestamp and geolocation. The system aggregates these clips to identify "hotspots" — geographic clusters of activity that indicate significant events (protests, accidents, natural disasters, cultural moments).
+Video Hotspot is a Qt miniapp running inside the Logos app ("Basecamp") for uploading, storing, and collectively mapping events through video footage. Users import video files that are tagged with timestamp and geolocation. The system indexes these clips by location and time, allowing anyone to browse a live map of documented events.
 
 ### Inspiration
 
-This spec synthesizes concepts from [LoreLine.Live](https://github.com/logos-co/ideas/issues/7) (collaborative documentary creation, raw footage preservation, collective memory) with geolocation-based event detection. Like LoreLine, Video Hotspot believes:
+This spec synthesizes concepts from [LoreLine.Live](https://github.com/logos-co/ideas/issues/7) (collaborative documentary creation, raw footage preservation, collective memory) with geolocation-based event discovery. Like LoreLine, Video Hotspot believes:
 
 - **Raw footage, your own opinion** — No overlays, no editorial framing. Present what was captured.
 - **Everyone is a documentarian** — Ordinary people capture extraordinary moments; those fragments deserve to become part of something bigger.
@@ -16,7 +16,7 @@ This spec synthesizes concepts from [LoreLine.Live](https://github.com/logos-co/
 
 ### Core Differentiator
 
-Video Hotspot adds **spatial intelligence** to collective documentation: automatically detecting where events are clustering in real-time through geolocation data, creating a "heat map" of unfolding situations.
+Video Hotspot adds **spatial intelligence** to collective documentation: indexing videos by geolocation and timestamp so users can browse a map and scrub through time to see what happened, where, when.
 
 ---
 
@@ -24,74 +24,144 @@ Video Hotspot adds **spatial intelligence** to collective documentation: automat
 
 ### F — Functionality
 
-#### Video Capture & Upload
-- [ ] Webcam/external camera integration for video recording
-- [ ] Import existing video files (drag-and-drop or file picker)
-- [ ] Automatic EXIF stripping (preserve only timestamp + user-approved geolocation)
-- [ ] Configurable quality presets (low/medium/high) for bandwidth-constrained environments
-- [ ] Background upload queue with retry logic
-- [ ] Optional audio-only mode (smaller files, less identifiable)
+#### Video Upload
+- [ ] Import individual video files via file picker (manual select)
+- [ ] Import all videos from a folder (folder picker)
+- [ ] Folder monitoring: watch a folder, auto-upload new files added to it
+- [ ] Deduplication: compute content hash before upload — never upload the same file twice
+- [ ] Upload queue with progress indicators and retry logic
+- [ ] Background uploading (continues while browsing map)
+- [ ] **No webcam integration** — import existing files only
 
 #### Timestamp & Geolocation Tagging
-- [ ] Capture precise timestamp (Unix epoch, timezone-aware)
-- [ ] Manual geolocation input (map pin selection or coordinates)
-- [ ] IP-based approximate location as optional default
-- [ ] Privacy mode: fuzzy location (city-level or neighborhood-level only)
+- [ ] Extract timestamp from video file metadata (EXIF/creation date)
+- [ ] If video has EXIF geolocation: use it automatically
+- [ ] If no EXIF geolocation: prompt user to pinpoint location on interactive map
+- [ ] Store precise coordinates + timestamp — no fuzzy zones or clustering for now
+- [ ] **No IP-based geolocation** — never infer location from network data
 
-#### Hotspot Detection & Visualization
-- [ ] Real-time aggregation of uploads by geolocation + time window
-- [ ] Configurable clustering algorithm (e.g., DBSCAN or grid-based)
-- [ ] Heat map visualization on map interface
-- [ ] Hotspot alerts: notify users when activity spike detected in their region
-- [ ] Temporal scrubbing: view hotspot evolution over time (slider to "rewind")
+#### Map Browsing
+- [ ] Interactive map showing video pins at their geolocations
+- [ ] Timeline slider to filter by time range (scrub to see events over time)
+- [ ] Click pin to preview/play video
+- [ ] Zoom and pan across regions
+- [ ] Basic search by location (center map on searched area)
 
-#### Search & Filter
-- [ ] Filter by date range, location radius, keywords (user-provided tags)
-- [ ] Sort by recency, proximity, or activity density
-- [ ] Bookmark/save hotspots of interest
-- [ ] Follow specific locations (persistent notifications)
-
-#### Content Organization
-- [ ] User-created collections ("lorelines") grouping related clips
-- [ ] Community contributions: suggest clips to someone else's collection
-- [ ] Moderation: collection owner approves/rejects contributions
+#### Video Playback & Download
+- [ ] Stream videos directly from Logos Storage
+- [ ] Download videos for offline viewing
+- [ ] Downloaded videos become seedable (user becomes uploader for that content)
+- [ ] Track which videos are user-owned vs. cached downloads
 
 #### Logos Stack Integration
-- [ ] **Logos Messaging** — Peer-to-peer transport for upload metadata, hotspot announcements, and real-time notifications
-- [ ] **Logos Storage** — Decentralized storage for video files (content-addressed, erasure-coded)
-- [ ] **Logos Blockchain** (optional) — Timestamping proofs for clip authenticity (if blockchain anchoring desired)
+- [ ] **Logos Messaging** — Live/real-time indexing as videos are uploaded
+  - Publishes metadata (CID, geolocation, timestamp) on upload
+  - Subscribers receive new video announcements in real-time
+- [ ] **Logos Storage** — Decentralized storage for video files (content-addressed)
+- [ ] **Logos Blockchain** — Batch/historical indexing
+  - Periodic batches (e.g., 24-hour aggregates) of video metadata committed to blockchain
+  - Indexing only — not for proofing or authentication
 
 ---
 
 ### U — Usability
 
-#### Desktop-First Design
-- [ ] Clean, focused interface: map view + capture/import panel
-- [ ] Keyboard shortcuts for power users (record, upload, navigate map)
-- [ ] System tray integration for background operation
+#### Screens (Detailed)
+
+##### 1. Upload Screen
+The upload screen is the primary entry point for adding content:
+
+- **File Picker Button** — Opens system file dialog to select one or more video files
+- **Folder Picker Button** — Select a folder; all video files within are queued for upload
+- **Folder Monitor Toggle** — Enable/disable watching a configured folder for new files
+  - When enabled: any new video dropped into the monitored folder auto-queues
+  - Visual indicator shows monitoring status (active/inactive)
+- **Upload Queue** — List of pending/in-progress uploads showing:
+  - Filename and thumbnail preview
+  - Progress bar (percentage complete)
+  - Status: pending, uploading, processing, complete, failed
+  - Retry button for failed uploads
+- **Dedup Status** — Indicator when a file is skipped (already uploaded, hash match)
+  - "Already uploaded" badge with link to existing entry
+- **Geolocation Prompt** — For files without EXIF location:
+  - Inline map widget to pinpoint location
+  - Required before upload proceeds
+
+##### 2. Map Screen
+The map screen is the core browsing experience:
+
+- **Interactive Map** — Full-screen map (OpenStreetMap or similar)
+  - Video pins displayed as markers at their geolocations
+  - Pin density visualization: areas with many videos show clustered indicators
+  - Pins color-coded or sized by recency (brighter/larger = more recent)
+- **Timeline Slider** — Horizontal slider at bottom of screen
+  - Drag to filter videos by time range
+  - Shows date/time labels at slider position
+  - As slider moves, pins appear/disappear based on timestamp
+  - "Play" button to animate through time automatically
+- **Pin Interaction**
+  - Hover: show timestamp and thumbnail preview
+  - Click: expand to video player overlay
+  - Download button on expanded view
+- **Zoom Controls** — Standard +/- or scroll-to-zoom
+- **Search Bar** — Type location name to center map on that area
+
+##### 3. Settings Screen
+Configuration and preferences:
+
+- **Storage Allocation**
+  - Slider or input to set maximum local storage for cached/downloaded videos
+  - Current usage display (e.g., "Using 2.3 GB of 10 GB allocated")
+- **Folder Monitor Path**
+  - Display currently monitored folder path
+  - Button to change monitored folder
+  - Toggle to enable/disable monitoring
+- **Network Settings**
+  - Bootstrap nodes configuration
+  - Bandwidth limits (optional)
+  - Connection status indicator
+
+##### 4. Downloaded / Cache Management Screen
+Manage local video storage:
+
+- **Space Usage Bar** — Visual bar showing total allocated vs. used space
+  - Breakdown: user-owned vs. cached (downloaded from others)
+- **Video List** — Two sections:
+  - **Your Videos** (user-uploaded) — Never auto-deleted
+    - Each entry shows: thumbnail, title/filename, size, upload date
+    - Manual delete option (removes from local + stops seeding)
+  - **Cached Videos** (downloaded from others) — Deletable
+    - Each entry shows: thumbnail, title/filename, size, download date
+    - Checkbox selection for batch delete
+    - "Clear All Cached" button
+- **Auto-Clean Settings**
+  - When storage limit reached: auto-delete oldest cached videos (not user-owned)
+  - Display estimated days of cache remaining at current usage rate
+- **Manual Delete Controls**
+  - Select multiple cached videos
+  - Delete selected button
+  - Confirmation dialog
+
+#### Interface Guidelines
+- [ ] Clean, minimal interface — map-centric design
 - [ ] Dark mode default (field use, nighttime events)
+- [ ] Integrates within Basecamp app navigation
 
-#### Low-Connectivity Environments
-- [ ] Progressive upload: lower resolution first, full quality when bandwidth available
-- [ ] Store-and-forward: local storage until connection restored
-- [ ] Mesh relay (optional): Logos Messaging nodes on local network can relay uploads
+#### Language
+- [ ] English only (no localization for now)
 
-#### Accessibility
-- [ ] Screen reader support for core flows
-- [ ] High-contrast mode
-- [ ] Localization: i18n-ready (initial: English, Spanish, Arabic, Mandarin)
-
-#### Onboarding
-- [ ] Zero-KYC: no account creation required for basic use
-- [ ] Optional pseudonymous identity (keypair-based, no PII)
-- [ ] Progressive trust: unlock features (collections, following) after first upload
+#### What's NOT Included
+- [ ] No notifications (no alerts, no push messages)
+- [ ] No content organization (no tags, no collections, no editorial features)
+- [ ] No mesh relay (direct p2p only)
 
 ---
 
 ### R — Reliability
 
 #### Offline Operation
-- [ ] Full capture functionality without internet
+- [ ] Upload queue persists across app restarts
+- [ ] Downloaded videos playable offline
 - [ ] Local database for pending uploads (SQLite or equivalent)
 - [ ] Sync on reconnect: background service handles upload queue
 
@@ -99,11 +169,11 @@ Video Hotspot adds **spatial intelligence** to collective documentation: automat
 - [ ] Chunked upload with resumption (no full-file restart on failure)
 - [ ] Automatic retry with exponential backoff
 - [ ] Corruption detection (checksum verification pre-upload)
+- [ ] Dedup check prevents wasted bandwidth on re-uploads
 
 #### Data Integrity
 - [ ] Content-addressed storage (CID-based) ensures immutability
-- [ ] Redundant storage via Logos Storage erasure coding
-- [ ] Optional: blockchain anchoring for timestamping proofs
+- [ ] Hash verification on download
 
 #### Graceful Degradation
 - [ ] If Logos Storage unreachable: local-only mode with periodic retry
@@ -118,80 +188,75 @@ Video Hotspot adds **spatial intelligence** to collective documentation: automat
 - [ ] Target: <10s upload start-to-confirmation for 30s clip on broadband
 - [ ] Chunk size tuned for typical bandwidth (512KB–2MB chunks)
 - [ ] Parallel chunk upload where beneficial
+- [ ] Dedup check (hash comparison) completes before upload starts
 
 #### Map Rendering
-- [ ] Target: <2s initial load of map with 100 hotspots visible
-- [ ] Lazy loading: fetch clip details on demand (click hotspot)
+- [ ] Target: <2s initial load of map with 100 pins visible
+- [ ] Lazy loading: fetch video details on demand (click pin)
 - [ ] Tile caching for offline map access in previously viewed areas
-
-#### Hotspot Aggregation
-- [ ] Real-time updates: new clips reflected in hotspot intensity within <30s
-- [ ] Background aggregation: client receives push updates via Logos Messaging
-- [ ] Efficient spatial indexing (R-tree or geohash-based)
+- [ ] Smooth timeline scrubbing (no UI freeze)
 
 #### Resource Usage
 - [ ] Video compression before upload (H.265/HEVC where supported)
-- [ ] Configurable upload schedule (immediate vs. metered connection vs. scheduled)
 - [ ] Background process: minimal CPU/memory footprint when idle
+- [ ] Configurable storage limits to prevent disk bloat
 
 ---
 
 ### S — Supportability
 
-#### Configurable Retention
-- [ ] User-configurable local storage limits (auto-delete oldest after X GB)
-- [ ] Network-level retention policies (Logos Storage node operators define)
-- [ ] User can request deletion of their uploads (propagates to Logos Storage nodes honoring policy)
+#### Platform
+- [ ] **Qt miniapp** running inside Basecamp (Logos desktop app)
+- [ ] Cross-platform via Qt: Windows, macOS, Linux
+- [ ] **Not** a standalone Electron/Tauri application
+
+#### Storage Management
+- [ ] User-configurable local storage limits
+- [ ] Auto-clean: oldest cached videos deleted when limit reached
+- [ ] User-owned videos never auto-deleted
+- [ ] Manual deletion controls for both owned and cached content
 
 #### Open Formats
 - [ ] Video: MP4 (H.264/H.265), WebM (VP9) supported
-- [ ] Metadata: JSON-LD or CBOR, schema-documented
-- [ ] Export: download original files + metadata bundle
-
-#### No Lock-In
-- [ ] Self-hostable backend (Logos Storage + Logos Messaging nodes)
-- [ ] API-first: documented REST/GraphQL endpoints for third-party clients
-- [ ] Open-source client (MIT/Apache 2.0)
+- [ ] Metadata: JSON, schema-documented
+- [ ] Export: download original files
 
 #### Observability
-- [ ] Structured logging (OpenTelemetry-compatible)
-- [ ] Metrics: upload success rate, hotspot detection latency, storage utilization
-- [ ] User-facing: upload history, storage used, sync status
+- [ ] Upload history visible to user
+- [ ] Storage used / allocated display
+- [ ] Sync status indicators
+- [ ] Folder monitor status
 
 ---
 
 ### + — Hardware & Deployment
 
-#### Desktop Application
-- [ ] **Windows** — Windows 10+ (Electron or native)
-- [ ] **macOS** — macOS 11+ (Electron or native)
-- [ ] **Linux** — Ubuntu 20.04+, Fedora 34+ (Electron or native AppImage/Flatpak)
-- [ ] Cross-platform framework: Electron (Chromium + Node.js) or Tauri (Rust + WebView)
+#### Basecamp Integration
+- [ ] Runs as Qt miniapp inside Basecamp (Logos desktop app)
+- [ ] Inherits Basecamp's platform support (Windows 10+, macOS 11+, Linux)
+- [ ] Uses Basecamp's Logos stack connections (Messaging, Storage, Blockchain)
 
 #### Out of Scope
-- [ ] Mobile platforms (iOS, Android) — explicitly excluded from this spec
+- [ ] Mobile platforms (iOS, Android) — explicitly excluded
+- [ ] Standalone desktop app — must run inside Basecamp
+- [ ] Webcam/camera capture — import existing files only
 
 #### Logos Stack Dependencies
-- [ ] **Logos Messaging** — Messaging layer
-  - Content topics for: upload announcements, hotspot updates, notifications
-  - Filter/LightPush for desktop client
-- [ ] **Logos Storage** — Storage layer
-  - Client library for upload/download
-  - Discovery via Logos Messaging or DHT
-- [ ] **Logos Blockchain** (optional) — Blockchain layer
-  - Timestamping service (anchor CID + timestamp)
-  - Not required for MVP
-
-#### Infrastructure
-- [ ] No centralized server required (Logos stack is peer-to-peer)
-- [ ] Optional: aggregation node for hotspot computation (can run on any peer)
-- [ ] Bootstrap nodes: community-run or Logos-provided for initial discovery
+- [ ] **Logos Messaging** — Real-time indexing
+  - Publish video metadata on upload
+  - Subscribe to new video announcements
+- [ ] **Logos Storage** — Decentralized video storage
+  - Upload/download via client library
+  - Content-addressed (CID-based)
+- [ ] **Logos Blockchain** — Batch indexing
+  - 24-hour batches of video metadata
+  - Indexing only (not proofing/authentication)
 
 #### Security & Privacy
-- [ ] End-to-end encryption for private collections (NaCl/libsodium)
-- [ ] Metadata minimization: only timestamp + fuzzy location required
-- [ ] No PII storage; pseudonymous identities only
-- [ ] Plausible deniability: Logos Messaging relay doesn't reveal origin
+- [ ] No IP-based geolocation (never)
+- [ ] Metadata minimization: only timestamp + explicit user-provided geolocation
+- [ ] No PII storage
+- [ ] Downloaded videos contribute to network (seeding)
 
 ---
 
@@ -199,24 +264,25 @@ Video Hotspot adds **spatial intelligence** to collective documentation: automat
 
 For initial release:
 
-1. **Capture & Upload** — Webcam recording or file import, upload to Logos Storage via Logos Messaging
-2. **Map View** — View own uploads and public uploads on map
-3. **Basic Hotspot** — Grid-based clustering with simple heat map
-4. **Offline Queue** — Capture offline, sync when connected
+1. **Upload** — File picker, folder picker, folder monitor, dedup, upload queue
+2. **Geolocation** — EXIF extraction or manual pin placement
+3. **Map View** — Browse pins by location, timeline slider for time filtering
+4. **Download & Cache** — Download videos, storage management, auto-clean
+5. **Offline Queue** — Capture offline, sync when connected
 
 Out of scope for MVP:
 - Collections/lorelines
-- Community contributions
-- Logos Blockchain timestamping
-- Advanced search/filter
+- Tags or content organization
+- Notifications
 - Mobile platforms
+- Webcam capture
+- Multiple languages
 
 ---
 
 ## References
 
 - [LoreLine.Live (logos-co/ideas #7)](https://github.com/logos-co/ideas/issues/7) — Collaborative documentary platform concept
-- [Privacy Preserving Location Tracker (logos-co/ideas #3)](https://github.com/logos-co/ideas/issues/3) — Private location sharing
 - [Logos Network](https://logos.co)
 
 ---
