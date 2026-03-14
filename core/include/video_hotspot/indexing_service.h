@@ -4,6 +4,7 @@
 #include <QList>
 #include <QObject>
 #include <QString>
+#include <memory>
 
 namespace VideoHotspot {
 
@@ -31,6 +32,8 @@ struct VideoFilter {
     QDateTime toTime;
     int       limit     = 500;    ///< 0 = unlimited
 };
+
+struct IndexingServicePrivate;
 
 /**
  * @brief Manages the local video index and live pub/sub via Logos Messaging.
@@ -76,6 +79,9 @@ signals:
 
     /// Emitted when the local index has finished bootstrapping from history.
     void indexReady();
+
+private:
+    std::unique_ptr<IndexingServicePrivate> d;
 };
 
 }  // namespace VideoHotspot

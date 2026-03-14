@@ -6,6 +6,7 @@
 #include <QList>
 #include <QObject>
 #include <QString>
+#include <memory>
 
 namespace VideoHotspot {
 
@@ -31,6 +32,8 @@ struct UploadItem {
     QString      existingCid;  ///< Set on Duplicate
     QString      errorMsg;     ///< Set on Failed
 };
+
+struct UploadQueuePrivate;
 
 /**
  * @brief Manages the ordered queue of video uploads.
@@ -81,6 +84,13 @@ signals:
     void itemChanged(const UploadItem& item);
     void itemRemoved(const QString& itemId);
     void allComplete();
+
+private:
+    void processItem(const QString& id, const QString& filePath);
+    void startUpload(const QString& id, const QString& filePath,
+                     const QString& blake3Hash);
+
+    std::unique_ptr<UploadQueuePrivate> d;
 };
 
 }  // namespace VideoHotspot

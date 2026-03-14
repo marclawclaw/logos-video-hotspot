@@ -7,19 +7,24 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
 # ---------------------------------------------------------------------------
+# Build options
+# ---------------------------------------------------------------------------
+option(BUILD_UI_PLUGIN "Build the IComponent UI plugin for logos-app" OFF)
+option(BUILD_UI_APP    "Build the standalone demo app" OFF)
+option(BUILD_TESTS     "Build unit and e2e tests" ON)
+
+# ---------------------------------------------------------------------------
 # Dependencies
 # ---------------------------------------------------------------------------
 find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Network Sql)
 
-# BLAKE3 (deduplication hashing) — vendored as submodule or FetchContent
-include(FetchContent)
-FetchContent_Declare(
-    blake3
-    GIT_REPOSITORY https://github.com/BLAKE3-team/BLAKE3
-    GIT_TAG        1.5.1
-    SOURCE_SUBDIR  c
-)
-FetchContent_MakeAvailable(blake3)
+# NOTE: Real production build uses BLAKE3 for content hashing.
+# This mock build uses Qt6's QCryptographicHash (SHA-256) to avoid a
+# FetchContent build step. BLAKE3 is documented in ADR-0005.
+# To enable real BLAKE3:
+#   - Add BLAKE3 FetchContent or find_package
+#   - Define REAL_BLAKE3 and link blake3 library
+#   - Swap hash implementation in deduplicator.cpp
 
 # ---------------------------------------------------------------------------
 # Core library (shared between CLI and Qt plugin)
@@ -31,10 +36,18 @@ add_library(video_hotspot_core STATIC
     core/src/indexing_service.cpp
     core/src/metadata_extractor.cpp
     core/src/messaging_client.cpp
+    # Include headers as sources so AUTOMOC picks up Q_OBJECT declarations
+    core/include/video_hotspot/storage_client.h
+    core/include/video_hotspot/deduplicator.h
+    core/include/video_hotspot/upload_queue.h
+    core/include/video_hotspot/indexing_service.h
+    core/include/video_hotspot/metadata_extractor.h
+    core/include/video_hotspot/messaging_client.h
 )
 
 target_include_directories(video_hotspot_core
     PUBLIC  core/include
+    PRIVATE core/src
 )
 
 target_link_libraries(video_hotspot_core
@@ -43,7 +56,6 @@ target_link_libraries(video_hotspot_core
         Qt6::Concurrent
         Qt6::Network
         Qt6::Sql
-        blake3
 )
 
 # ---------------------------------------------------------------------------
@@ -52,17 +64,23 @@ target_link_libraries(video_hotspot_core
 add_subdirectory(cli)
 
 # ---------------------------------------------------------------------------
-# Qt miniapp plugin
+# Qt miniapp plugin (optional — requires logos-cpp-sdk headers)
 # ---------------------------------------------------------------------------
-add_subdirectory(ui/plugin)
+if(BUILD_UI_PLUGIN)
+    add_subdirectory(ui/plugin)
+endif()
 
 # ---------------------------------------------------------------------------
-# Standalone demo app (for development without Basecamp)
+# Standalone demo app (optional)
 # ---------------------------------------------------------------------------
-add_subdirectory(ui/app)
+if(BUILD_UI_APP)
+    add_subdirectory(ui/app)
+endif()
 
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
-enable_testing()
-add_subdirectory(tests)
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()

@@ -4,8 +4,11 @@
 #include <QFuture>
 #include <QObject>
 #include <QString>
+#include <memory>
 
 namespace VideoHotspot {
+
+struct MessagingClientPrivate;
 
 /**
  * @brief Thin async wrapper around Logos Messaging for the video-hotspot topic.
@@ -51,6 +54,9 @@ signals:
     void messageReceived(const QByteArray& payload);
     void connectionStateChanged(bool connected);
     void publishFailed(const QByteArray& payload, const QString& error);
+
+private:
+    std::unique_ptr<MessagingClientPrivate> d;
 };
 
 }  // namespace VideoHotspot
