@@ -4,6 +4,7 @@
 
 #include <QCoreApplication>
 #include <QDir>
+#include <QDirIterator>
 #include <QEventLoop>
 #include <QFile>
 #include <QFileInfo>
@@ -17,55 +18,83 @@ namespace VideoHotspot {
 
 // ── Shared helper: wait for an item to reach a terminal status ───────────────
 
+static bool isTerminal(UploadStatus s) {
+    return s == UploadStatus::Complete
+        || s == UploadStatus::Failed
+        || s == UploadStatus::Duplicate;
+}
+
 static UploadItem waitForCompletion(UploadQueue* queue, const QString& itemId)
 {
     QEventLoop loop;
     UploadItem result;
+    bool done = false;
 
     // Connect BEFORE checking current state to avoid TOCTOU: if the item
     // completes between checking state and connecting the signal, we'd wait
     // forever. By connecting first we're guaranteed to catch the transition.
     auto connection = QObject::connect(queue, &UploadQueue::itemChanged,
                      &loop, [&](const UploadItem& item) {
-                         if (item.id != itemId) return;
-                         switch (item.status) {
-                         case UploadStatus::Complete:
-                         case UploadStatus::Failed:
-                         case UploadStatus::Duplicate:
+                         if (done || item.id != itemId) return;
+                         if (isTerminal(item.status)) {
+                             done = true;
                              result = item;
                              loop.quit();
-                             break;
-                         default:
-                             break;
                          }
                      });
 
     // Safety timeout: 60 s
-    QTimer::singleShot(60000, &loop, [&loop, &result, itemId]() {
-        result.id = itemId;
-        result.status = UploadStatus::Failed;
-        result.errorMsg = "Upload timeout";
-        loop.quit();
+    QTimer::singleShot(60000, &loop, [&loop, &result, &done, itemId]() {
+        if (!done) {
+            done = true;
+            result.id = itemId;
+            result.status = UploadStatus::Failed;
+            result.errorMsg = "Upload timeout";
+            loop.quit();
+        }
     });
 
-    // Check current state AFTER connecting to catch already-complete items
-    // (the signal may have fired while we were setting up the event loop).
-    for (const auto& item : queue->items()) {
-        if (item.id == itemId) {
-            switch (item.status) {
-            case UploadStatus::Complete:
-            case UploadStatus::Failed:
-            case UploadStatus::Duplicate:
-                QObject::disconnect(connection);
-                return item;
-            default:
+    // Fallback poll: every 50 ms re-check the DB in case the itemChanged
+    // signal was emitted while another event loop level was active and the
+    // slot was connected to a different loop context, causing the signal to
+    // be processed but loop.quit() called on the wrong loop instance.
+    QTimer pollTimer;
+    pollTimer.setInterval(50);
+    QObject::connect(&pollTimer, &QTimer::timeout, &loop, [&]() {
+        if (done) { pollTimer.stop(); return; }
+        for (const auto& item : queue->items()) {
+            if (item.id == itemId && isTerminal(item.status)) {
+                done = true;
+                result = item;
+                pollTimer.stop();
+                loop.quit();
+                return;
+            }
+        }
+    });
+    pollTimer.start();
+
+    // Process any events already queued (e.g. finished signals from
+    // concurrent uploads that completed before this call started).
+    QCoreApplication::processEvents(QEventLoop::AllEvents);
+
+    // Check current state AFTER processing pending events to catch
+    // already-complete items.
+    if (!done) {
+        for (const auto& item : queue->items()) {
+            if (item.id == itemId && isTerminal(item.status)) {
+                done = true;
+                result = item;
                 break;
             }
-            break;
         }
     }
 
-    loop.exec();
+    if (!done) {
+        loop.exec();
+    }
+
+    pollTimer.stop();
     QObject::disconnect(connection);
     return result;
 }
@@ -101,6 +130,22 @@ int runUpload(const QStringList& args, bool humanMode)
 
 // ── upload-folder command ─────────────────────────────────────────────────────
 
+// Enumerate video files in a directory (same filters as UploadQueue).
+static QStringList findVideoFiles(const QString& dirPath)
+{
+    static const QStringList kVideoFilters = {
+        "*.mp4", "*.mov", "*.avi", "*.mkv", "*.webm",
+        "*.m4v", "*.flv", "*.wmv", "*.ts", "*.mpg", "*.mpeg"
+    };
+    QStringList paths;
+    QDirIterator it(dirPath, kVideoFilters,
+                    QDir::Files | QDir::Readable,
+                    QDirIterator::NoIteratorFlags);
+    while (it.hasNext())
+        paths.append(it.next());
+    return paths;
+}
+
 int runUploadFolder(const QStringList& args, bool humanMode)
 {
     OutputFormatter fmt(humanMode);
@@ -114,23 +159,31 @@ int runUploadFolder(const QStringList& args, bool humanMode)
         return fmt.error("Directory not found: " + dirPath);
     }
 
-    HeadlessCore core;
-
-    const QStringList ids = core.queue->enqueueFolder(dirPath);
-    if (ids.isEmpty()) {
+    const QStringList filePaths = findVideoFiles(dirPath);
+    if (filePaths.isEmpty()) {
         fmt.successMessage("No video files found in " + dirPath);
         return 0;
     }
 
+    HeadlessCore core;
+
     QTextStream out(stdout);
     if (humanMode) {
-        out << "Queued " << ids.size() << " file(s)...\n";
+        out << "Queued " << filePaths.size() << " file(s)...\n";
     }
 
     int succeeded = 0;
     int failed    = 0;
 
-    for (const QString& id : ids) {
+    // Process files one at a time (sequential) to avoid concurrent event-loop
+    // races where itemChanged signals fired during one file's waitForCompletion
+    // loop are lost for subsequent files.
+    for (const QString& fp : filePaths) {
+        const QString id = core.queue->enqueue(fp);
+        if (id.isEmpty()) {
+            ++failed;
+            continue;
+        }
         const UploadItem item = waitForCompletion(core.queue.get(), id);
         fmt.uploadResult(item);
         if (item.status == UploadStatus::Complete ||
@@ -145,7 +198,7 @@ int runUploadFolder(const QStringList& args, bool humanMode)
         // Print summary
         QJsonObject summary;
         summary["status"]    = failed == 0 ? "ok" : "partial";
-        summary["total"]     = ids.size();
+        summary["total"]     = filePaths.size();
         summary["succeeded"] = succeeded;
         summary["failed"]    = failed;
         QTextStream(stdout) << QJsonDocument(summary).toJson(QJsonDocument::Compact) << Qt::endl;

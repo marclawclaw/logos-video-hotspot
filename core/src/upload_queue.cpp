@@ -197,7 +197,8 @@ void UploadQueue::startUpload(const QString& id, const QString& filePath,
         emit itemChanged(item);
     }
 
-    // Connect progress
+    // Connect progress — use Qt::QueuedConnection so the slot always runs
+    // in the main thread even though StorageClient emits from a worker thread.
     connect(d->storage, &StorageClient::uploadProgress,
             this, [this, id, filePath](const QString& fp, qint64 done, qint64 total) {
                 if (fp != filePath) return;
@@ -213,7 +214,7 @@ void UploadQueue::startUpload(const QString& id, const QString& filePath,
                 item.status = UploadStatus::Uploading;
                 item.progressPct = pct;
                 emit itemChanged(item);
-            });
+            }, Qt::QueuedConnection);
 
     auto* uploadWatcher = new QFutureWatcher<QString>(this);
     connect(uploadWatcher, &QFutureWatcher<QString>::finished,
