@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file>qml/VideoHotspotApp.qml</file>
+    </qresource>
+</RCC>

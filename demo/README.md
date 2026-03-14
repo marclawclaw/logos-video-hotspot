@@ -112,11 +112,23 @@ cmake --build build --target video_hotspot_plugin video-hotspot-app -j4
 
 ```bash
 cd /path/to/logos-video-hotspot
-DISPLAY=:99 LD_LIBRARY_PATH=./build/ui/plugin:$LD_LIBRARY_PATH \
+DISPLAY=:99 QT_QPA_PLATFORM=xcb LD_LIBRARY_PATH=./build/ui/plugin:$LD_LIBRARY_PATH \
   ./build/ui/app/video-hotspot-app &
 APP_PID=$!
-sleep 3   # give the window time to appear
+sleep 4   # give Qt Quick time to render the QML
 ```
+
+> **Platform flags:**
+> - `QT_QPA_PLATFORM=xcb` — forces the xcb (X11) platform plugin, required when
+>   running under Xvfb. Without this Qt may try eglfs or another backend and fail
+>   to create a window.
+> - `LD_LIBRARY_PATH=./build/ui/plugin` — ensures the app can locate
+>   `libvideo_hotspot_plugin.so` at runtime.
+>
+> If the window appears blank, verify that `BUILD_UI_PLUGIN=ON` was set at
+> CMake configure time — the plugin embeds the QML as a Qt resource. Without
+> `BUILD_UI_PLUGIN`, `createWidget()` returns `nullptr` and the app exits with
+> code 1.
 
 ### 5. Record with ffmpeg (x11grab)
 

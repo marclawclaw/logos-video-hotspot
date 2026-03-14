@@ -127,12 +127,12 @@ The CLI binary lands at `build/cli/video-hotspot`.
 
 ### CLI Usage
 
-All commands support `--human` (`-H`) for human-readable output, or emit JSON by default.
+Human-readable output is the default. Add `--json` (`-J`) for machine-readable JSON.
 
 #### Check node status
 
 ```bash
-./build/cli/video-hotspot status --human
+./build/cli/video-hotspot status
 # Logos connection: connected (mock)
 # Videos indexed:   0
 # Pending messages: 0
@@ -144,7 +144,7 @@ All commands support `--human` (`-H`) for human-readable output, or emit JSON by
 #### Upload a single video
 
 ```bash
-./build/cli/video-hotspot upload path/to/video.mp4 --human
+./build/cli/video-hotspot upload path/to/video.mp4
 # Uploaded: path/to/video.mp4
 # CID:      44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a
 ```
@@ -152,7 +152,7 @@ All commands support `--human` (`-H`) for human-readable output, or emit JSON by
 #### Deduplication — upload the same file again
 
 ```bash
-./build/cli/video-hotspot upload path/to/video.mp4 --human
+./build/cli/video-hotspot upload path/to/video.mp4
 # Duplicate: path/to/video.mp4
 # CID:       44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a (already uploaded)
 ```
@@ -160,7 +160,7 @@ All commands support `--human` (`-H`) for human-readable output, or emit JSON by
 #### Upload all videos in a folder
 
 ```bash
-./build/cli/video-hotspot upload-folder path/to/folder --human
+./build/cli/video-hotspot upload-folder path/to/folder
 # Uploaded: path/to/folder/clip-a.mp4
 # CID:      dc325b95ab25d5e15f41fc5253860bf8986a068875438c1cfca1f5ccc231ec36
 # Uploaded: path/to/folder/clip-b.mp4
@@ -173,7 +173,7 @@ All commands support `--human` (`-H`) for human-readable output, or emit JSON by
 #### List indexed videos
 
 ```bash
-./build/cli/video-hotspot list --human
+./build/cli/video-hotspot list
 # Total: 3 video(s)
 #   CID:  44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a
 #   Geo:  0, 0
@@ -187,7 +187,7 @@ All commands support `--human` (`-H`) for human-readable output, or emit JSON by
 #### Download a video by CID
 
 ```bash
-./build/cli/video-hotspot download 44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a ./downloads --human
+./build/cli/video-hotspot download 44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a ./downloads
 # cid: 44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a
 # local_path: ./downloads/44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a
 # status: ok
@@ -196,16 +196,16 @@ All commands support `--human` (`-H`) for human-readable output, or emit JSON by
 #### Clear cached (non-user-owned) videos
 
 ```bash
-./build/cli/video-hotspot cache clear --human
+./build/cli/video-hotspot cache clear
 # cleared_bytes: 0
 # cleared_count: 0
 # status: ok
 ```
 
-#### JSON output (default, no flag needed)
+#### JSON output (machine-readable, with --json flag)
 
 ```bash
-./build/cli/video-hotspot status
+./build/cli/video-hotspot status --json
 # {"cached_bytes":0,"connected":true,"index_count":0,"mode":"mock","pending_messages":0,"status":"ok","total_used_bytes":0,"user_owned_bytes":0}
 ```
 
@@ -288,8 +288,8 @@ Command-line interface for scripting, automation, and end-to-end testing. Runs a
 - [ ] `cache clear` — Clear cached (non-user-owned) videos
 
 **Output:**
-- [ ] JSON output by default (machine-readable, deterministic)
-- [ ] `--human` flag for human-readable formatted output
+- [ ] Human-readable output by default (terminal-friendly)
+- [ ] `--json` / `-J` flag for machine-readable JSON output
 - [ ] Exit codes follow standard conventions (0 = success, non-zero = error)
 
 ---

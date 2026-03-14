@@ -3,6 +3,7 @@
 #ifdef BUILD_UI_PLUGIN
 #include <QQuickWidget>
 #include <QQmlContext>
+#include <QUrl>
 #endif
 
 VideoHotspotPlugin::VideoHotspotPlugin(QObject* parent)
@@ -23,9 +24,11 @@ QWidget* VideoHotspotPlugin::createWidget(LogosAPI* logosAPI)
     // TODO: Create core modules, pass logosAPI to StorageClient/MessagingClient
     // auto* storage   = new VideoHotspot::StorageClient(logosAPI);
     // auto* messaging = new VideoHotspot::MessagingClient(logosAPI);
-    // ...
     // quickWidget->rootContext()->setContextProperty("videoHotspot", backend);
-    // quickWidget->setSource(QUrl("qrc:/qml/VideoHotspotApp.qml"));
+    Q_UNUSED(logosAPI)
+
+    // Load the embedded QML root (Rectangle — embeds cleanly in QQuickWidget)
+    quickWidget->setSource(QUrl("qrc:/qml/qml/VideoHotspotApp.qml"));
 
     return quickWidget;
 #else

@@ -6,6 +6,7 @@ find_package(Qt6 REQUIRED COMPONENTS Core Quick Widgets QuickWidgets)
 add_library(video_hotspot_plugin SHARED
     VideoHotspotPlugin.cpp
     VideoHotspotPlugin.h
+    resources.qrc
 )
 
 target_include_directories(video_hotspot_plugin PRIVATE .)

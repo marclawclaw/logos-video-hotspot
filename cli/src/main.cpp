@@ -14,7 +14,7 @@
  *   video-hotspot cache clear
  *
  * Flags:
- *   -H, --human   Human-readable output (default: JSON)
+ *   -J, --json   Machine-readable JSON output (default: human-readable)
  */
 
 #include "commands/commands.h"
@@ -50,9 +50,9 @@ int main(int argc, char* argv[])
         "upload | upload-folder | monitor | list | download | status | cache");
     parser.addPositionalArgument("args", "Command-specific arguments", "[args...]");
 
-    QCommandLineOption humanOutput({"H", "human"},
-        "Human-readable output (default: JSON)");
-    parser.addOption(humanOutput);
+    QCommandLineOption jsonOutput({"J", "json"},
+        "Machine-readable JSON output");
+    parser.addOption(jsonOutput);
 
     parser.parse(app.arguments());
 
@@ -63,7 +63,8 @@ int main(int argc, char* argv[])
 
     const QString command = positional.first();
     const QStringList args = positional.mid(1);
-    const bool human = parser.isSet(humanOutput);
+    // Human-readable is the default; JSON only when --json / -J is passed
+    const bool human = !parser.isSet(jsonOutput);
 
     if (command == "upload") {
         return VideoHotspot::runUpload(args, human);
