@@ -2,13 +2,94 @@
 
 > **Privacy-preserving video upload and geolocation-based event mapping on the Logos stack**
 
-## Demo
-
-### CLI
+## CLI Demo
 
 ![CLI demo](demo/cli-demo.gif)
 
-### GUI (Upload tab · Map tab)
+---
+
+## Loading in Logos Basecamp
+
+Video Hotspot ships as a Qt plugin (`libvideo_hotspot_plugin.so`) implementing the
+`IComponent` interface (`com.logos.component.IComponent`) from
+[jimmy-claw/scala](https://github.com/jimmy-claw/scala). Basecamp discovers plugins by
+scanning a well-known directory on startup.
+
+### 1 — Build the plugin
+
+```bash
+cmake -B build -DBUILD_UI_PLUGIN=ON
+cmake --build build --target video_hotspot_plugin
+# Output: build/ui/plugin/libvideo_hotspot_plugin.so  (Linux)
+#         build/ui/plugin/libvideo_hotspot_plugin.dylib  (macOS)
+```
+
+### 2 — Install into the Basecamp plugin directory
+
+```bash
+PLUGIN_DIR="$HOME/.local/share/Logos/LogosAppNix/plugins/video_hotspot"
+mkdir -p "$PLUGIN_DIR"
+cp build/ui/plugin/libvideo_hotspot_plugin.so "$PLUGIN_DIR/"
+cp ui/plugin/video_hotspot_plugin.json "$PLUGIN_DIR/"
+```
+
+The JSON manifest (`video_hotspot_plugin.json`) is read by Basecamp to identify the
+plugin type, version, and category before `dlopen`-ing the `.so`.
+
+### 3 — Launch Basecamp
+
+No extra flags are needed — Basecamp scans the plugins directory on every launch:
+
+```bash
+logos-app
+```
+
+> ⚠️ **TBD:** The exact `logos-app` binary name and install location are not yet
+> confirmed for production Basecamp builds. The path above matches the Nix packaging
+> convention observed in `jimmy-claw/scala`. Adjust if your Basecamp binary differs.
+
+If you need to point Basecamp at a non-default plugin directory (e.g. during
+development), try:
+
+```bash
+LOGOS_PLUGIN_PATH="$HOME/.local/share/Logos/LogosAppNix/plugins" logos-app
+```
+
+> ⚠️ **TBD:** `LOGOS_PLUGIN_PATH` is inferred from Basecamp conventions; the exact
+> environment variable name has not been confirmed upstream. Check `logos-app --help`
+> or the jimmy-claw/scala README once a live Basecamp build is available.
+
+### 4 — Verify it loaded
+
+Qt logs plugin resolution to stderr. Look for:
+
+```
+QFactoryLoader: loading plugin "com.logos.component.IComponent" from …/video_hotspot/libvideo_hotspot_plugin.so
+```
+
+One-liner to check at runtime:
+
+```bash
+logos-app 2>&1 | grep -i "video.hotspot\|IComponent"
+```
+
+If the line appears, the plugin was found and instantiated. If nothing appears, confirm
+the `.so` path and that `video_hotspot_plugin.json` is present alongside it.
+
+### Mock mode (no live Logos node)
+
+When Basecamp calls `createWidget(nullptr)` (no `LogosAPI` context), Video Hotspot
+falls back to local SQLite storage and filesystem-only uploads — useful for UI
+development without a running Logos node. See `VideoHotspotPlugin.cpp` for the
+`logosAPI == nullptr` branch.
+
+> ⚠️ **TBD:** Full `LogosAPI` wiring (passing real `logos::storage::Client` and
+> `logos::messaging::Client` into `StorageClient` / `MessagingClient`) is pending the
+> logos-cpp-sdk integration. ADR-0002 and ADR-0003 describe the intended flow.
+
+---
+
+## GUI Demo (Upload tab · Map tab)
 
 | Upload Screen | Map Screen |
 |:---:|:---:|
