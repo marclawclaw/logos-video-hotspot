@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Quick Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Quick Widgets QuickWidgets)
 
 # Qt miniapp plugin — loaded by Basecamp (logos-app)
 add_library(video_hotspot_plugin SHARED
@@ -10,12 +10,15 @@ add_library(video_hotspot_plugin SHARED
 
 target_include_directories(video_hotspot_plugin PRIVATE .)
 
+target_compile_definitions(video_hotspot_plugin PRIVATE BUILD_UI_PLUGIN)
+
 target_link_libraries(video_hotspot_plugin
     PRIVATE
         video_hotspot_core
         Qt6::Core
         Qt6::Quick
         Qt6::Widgets
+        Qt6::QuickWidgets
 )
 
 # Qt plugin metadata — tells logos-app the plugin type and ID

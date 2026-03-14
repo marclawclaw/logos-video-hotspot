@@ -5,20 +5,29 @@
 
 #include "../plugin/VideoHotspotPlugin.h"
 
-#include <QGuiApplication>
-#include <QQmlApplicationEngine>
+#include <QApplication>
+#include <QWidget>
 
 int main(int argc, char* argv[])
 {
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
     app.setApplicationName("VideoHotspot");
     app.setApplicationVersion("0.1.0");
 
     VideoHotspotPlugin plugin;
-    plugin.initialize(nullptr); // no SDK context in standalone mode
 
-    QQmlApplicationEngine engine;
-    engine.load(plugin.rootQmlUrl());
+    // Create widget in standalone/mock mode (no Logos SDK context)
+    QWidget* widget = plugin.createWidget(nullptr);
+    if (!widget) {
+        return 1;
+    }
 
-    return app.exec();
+    widget->setWindowTitle("Video Hotspot — Standalone Demo");
+    widget->resize(1280, 800);
+    widget->show();
+
+    int result = app.exec();
+
+    plugin.destroyWidget(widget);
+    return result;
 }

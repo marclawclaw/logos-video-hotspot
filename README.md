@@ -89,18 +89,20 @@ development without a running Logos node. See `VideoHotspotPlugin.cpp` for the
 
 ---
 
-## GUI Demo (Upload tab · Map tab)
+## GUI Demo
 
-| Upload Screen | Map Screen |
-|:---:|:---:|
-| ![Upload](demo/gui-upload.svg) | ![Map](demo/gui-map.svg) |
+<!-- GitHub renders MP4 when uploaded via drag-drop to an issue/PR; local path for repo reference -->
+**[▶ gui-demo.mp4](demo/gui-demo.mp4)** — real 20 s recording on a headless Pi via Xvfb
 
-> **Note:** The Qt GUI requires `Qt6Quick` and a display. The screenshots above are
-> generated mockups of `VideoHotspotApp.qml`. To run the real app:
-> ```
-> cmake -DBUILD_UI_APP=ON ..
-> make video-hotspot-app
-> ./video-hotspot-app
+> Captured with `ffmpeg -f x11grab` on a virtual display (no monitor required).
+> The app is built with `BUILD_UI_APP=ON` and `BUILD_UI_PLUGIN=ON`.
+> See [`demo/README.md § Virtual Display (Xvfb)`](demo/README.md#virtual-display-xvfb) for the exact setup.
+>
+> To run the app locally:
+> ```bash
+> cmake -B build -DBUILD_UI_APP=ON -DBUILD_UI_PLUGIN=ON
+> cmake --build build --target video-hotspot-app
+> ./build/ui/app/video-hotspot-app
 > ```
 
 ---
