@@ -240,18 +240,18 @@ Video Hotspot adds **spatial intelligence** to collective documentation: indexin
 ### F — Functionality
 
 #### Video Upload
-- [ ] Import individual video files via file picker (manual select)
-- [ ] Import all videos from a folder (folder picker)
-- [ ] Folder monitoring: watch a folder, auto-upload new files added to it
-- [ ] Deduplication: compute content hash before upload — never upload the same file twice
-- [ ] Upload queue with progress indicators and retry logic
+- [x] Import individual video files via file picker (manual select)
+- [x] Import all videos from a folder (folder picker)
+- [x] Folder monitoring: watch a folder, auto-upload new files added to it
+- [x] Deduplication: compute content hash before upload — never upload the same file twice
+- [x] Upload queue with progress indicators and retry logic
 - [ ] Background uploading (continues while browsing map)
 
 #### Timestamp & Geolocation Tagging
 - [ ] Extract timestamp from video file metadata (EXIF/creation date)
 - [ ] If video has EXIF geolocation: use it automatically
 - [ ] If no EXIF geolocation: prompt user to pinpoint location on interactive map
-- [ ] Store precise coordinates + timestamp — no fuzzy zones or clustering for now
+- [x] Store precise coordinates + timestamp — no fuzzy zones or clustering for now
 
 #### Map Browsing
 - [ ] Interactive map showing video pins at their geolocations
@@ -260,11 +260,13 @@ Video Hotspot adds **spatial intelligence** to collective documentation: indexin
 - [ ] Zoom and pan across regions
 - [ ] Basic search by location (center map on searched area)
 
+> **Note:** Map UI is a vector mockup (Canvas-rendered, no pixel artefacts); pins respond to the timeline slider with animated opacity fades. Real interactive map, pin data from index, and granularity buttons are pending SDK integration.
+
 #### Video Playback & Download
 - [ ] Play videos directly from Logos Storage
-- [ ] Download videos for offline viewing
+- [x] Download videos for offline viewing
 - [ ] Downloaded videos become seedable (user becomes uploader for that content)
-- [ ] Track which videos are user-owned vs. cached downloads
+- [x] Track which videos are user-owned vs. cached downloads
 
 #### Logos Stack Integration
 - [ ] **Logos Messaging** — Live/real-time indexing as videos are uploaded
@@ -275,22 +277,24 @@ Video Hotspot adds **spatial intelligence** to collective documentation: indexin
   - Periodic batches (e.g., 24-hour aggregates) of video metadata committed to blockchain
   - Indexing only — not for proofing or authentication
 
+> **Note:** All three Logos stack components are mock implementations (local SQLite / filesystem). The API surfaces are wired and the wrappers are production-ready; the SDK calls are stubbed pending logos-cpp-sdk integration.
+
 #### CLI (Headless Mode)
 Command-line interface for scripting, automation, and end-to-end testing. Runs against Logos Core in headless mode (no Qt UI required).
 
 **Commands:**
-- [ ] `upload <file>` — Upload a single video file
-- [ ] `upload-folder <path>` — Upload all videos in a folder
-- [ ] `monitor <path>` — Start monitoring a folder for new videos (foreground process)
-- [ ] `list` — List all indexed videos (timestamp, geolocation, CID)
-- [ ] `download <id>` — Download a video by ID/CID
-- [ ] `status` — Show node status, storage usage, connection state
-- [ ] `cache clear` — Clear cached (non-user-owned) videos
+- [x] `upload <file>` — Upload a single video file
+- [x] `upload-folder <path>` — Upload all videos in a folder
+- [x] `monitor <path>` — Start monitoring a folder for new videos (foreground process)
+- [x] `list` — List all indexed videos (timestamp, geolocation, CID)
+- [x] `download <id>` — Download a video by ID/CID
+- [x] `status` — Show node status, storage usage, connection state
+- [x] `cache clear` — Clear cached (non-user-owned) videos
 
 **Output:**
-- [ ] Human-readable output by default (terminal-friendly)
-- [ ] `--json` / `-J` flag for machine-readable JSON output
-- [ ] Exit codes follow standard conventions (0 = success, non-zero = error)
+- [x] Human-readable output by default (terminal-friendly)
+- [x] `--json` / `-J` flag for machine-readable JSON output
+- [x] Exit codes follow standard conventions (0 = success, non-zero = error)
 
 ---
 
@@ -373,8 +377,8 @@ Manage local video storage:
   - Confirmation dialog
 
 #### Interface Guidelines
-- [ ] Clean, minimal interface — map-centric design
-- [ ] Dark mode default (field use, nighttime events)
+- [x] Clean, minimal interface — map-centric design
+- [x] Dark mode default (field use, nighttime events)
 - [ ] Integrates within Basecamp app navigation
 
 ---
@@ -382,25 +386,27 @@ Manage local video storage:
 ### R — Reliability
 
 #### Offline Operation
-- [ ] Upload queue persists across app restarts
+- [x] Upload queue persists across app restarts
 - [ ] Downloaded videos playable offline
-- [ ] Local database for pending uploads (SQLite or equivalent)
+- [x] Local database for pending uploads (SQLite or equivalent)
 - [ ] Sync on reconnect: background service handles upload queue
 
 #### Upload Resilience
 - [ ] Chunked upload with resumption (no full-file restart on failure)
 - [ ] Automatic retry with exponential backoff
-- [ ] Corruption detection (checksum verification pre-upload)
-- [ ] Dedup check prevents wasted bandwidth on re-uploads
+- [x] Corruption detection (checksum verification pre-upload)
+- [x] Dedup check prevents wasted bandwidth on re-uploads
 
 #### Data Integrity
-- [ ] Content-addressed storage (CID-based) ensures immutability
+- [x] Content-addressed storage (CID-based) ensures immutability
 - [ ] Hash verification on download
 
 #### Graceful Degradation
 - [ ] If Logos Storage unreachable: local-only mode with periodic retry
 - [ ] If Logos Messaging unreachable: metadata batched and sent when available
 - [ ] Clear status indicators: user knows when offline/syncing/synced
+
+> **Note:** The mock always operates in local-only mode. `flushPending()` in MessagingClient is a stub; the `pending` DB table is scaffolded but the retry loop is not wired.
 
 ---
 
@@ -410,18 +416,18 @@ Manage local video storage:
 - [ ] Target: <10s upload start-to-confirmation for 30s clip on broadband
 - [ ] Chunk size tuned for typical bandwidth (512KB–2MB chunks)
 - [ ] Parallel chunk upload where beneficial
-- [ ] Dedup check (hash comparison) completes before upload starts
+- [x] Dedup check (hash comparison) completes before upload starts
 
 #### Map Rendering
 - [ ] Target: <2s initial load of map with 100 pins visible
 - [ ] Lazy loading: fetch video details on demand (click pin)
 - [ ] Tile caching for offline map access in previously viewed areas
-- [ ] Smooth timeline scrubbing (no UI freeze)
+- [x] Smooth timeline scrubbing (no UI freeze)
 
 #### Resource Usage
 - [ ] Video compression before upload (H.265/HEVC where supported)
 - [ ] Background process: minimal CPU/memory footprint when idle
-- [ ] Configurable storage limits to prevent disk bloat
+- [x] Configurable storage limits to prevent disk bloat
 
 ---
 
@@ -429,18 +435,18 @@ Manage local video storage:
 
 #### Platform
 - [ ] **Qt miniapp** running inside Basecamp (Logos desktop app)
-- [ ] Cross-platform via Qt: Windows, macOS, Linux
+- [x] Cross-platform via Qt: Windows, macOS, Linux
 
 #### Storage Management
-- [ ] User-configurable local storage limits
-- [ ] Auto-clean: oldest cached videos deleted when limit reached
-- [ ] User-owned videos never auto-deleted
+- [x] User-configurable local storage limits
+- [x] Auto-clean: oldest cached videos deleted when limit reached
+- [x] User-owned videos never auto-deleted
 - [ ] Manual deletion controls for both owned and cached content
 
 #### Open Formats
-- [ ] Video: MP4 (H.264/H.265), WebM (VP9) supported
-- [ ] Metadata: JSON, schema-documented
-- [ ] Export: download original files
+- [x] Video: MP4 (H.264/H.265), WebM (VP9) supported
+- [x] Metadata: JSON, schema-documented
+- [x] Export: download original files
 
 #### Observability
 - [ ] Upload history visible to user
@@ -449,10 +455,10 @@ Manage local video storage:
 - [ ] Folder monitor status
 
 #### CLI & Headless Mode
-- [ ] CLI and Qt UI share the same core module APIs (no duplicate logic)
-- [ ] Logos Core runs in headless mode when CLI is invoked (no window spawned)
-- [ ] CLI commands are scriptable and deterministic (designed for e2e testing)
-- [ ] CLI exit codes and JSON output enable automated test harnesses
+- [x] CLI and Qt UI share the same core module APIs (no duplicate logic)
+- [x] Logos Core runs in headless mode when CLI is invoked (no window spawned)
+- [x] CLI commands are scriptable and deterministic (designed for e2e testing)
+- [x] CLI exit codes and JSON output enable automated test harnesses
 
 ---
 
@@ -462,6 +468,8 @@ Manage local video storage:
 - [ ] Runs as Qt miniapp inside Basecamp (Logos desktop app)
 - [ ] Inherits Basecamp's platform support (Windows 10+, macOS 11+, Linux)
 - [ ] Uses Basecamp's Logos stack connections (Messaging, Storage, Blockchain)
+
+> **Note:** Plugin interface (`IComponent`) is implemented and the `.so` builds. Actual Basecamp wiring (`createWidget(logosAPI)` → real SDK) is marked TODO in `VideoHotspotPlugin.cpp` pending a live Basecamp binary.
 
 #### Logos Stack Dependencies
 - [ ] **Logos Messaging** — Real-time indexing
@@ -476,7 +484,7 @@ Manage local video storage:
 
 #### Security & Privacy
 - [ ] Metadata minimization: only timestamp + explicit user-provided geolocation
-- [ ] No PII storage
+- [x] No PII storage
 - [ ] Downloaded videos contribute to network (seeding)
 
 ---

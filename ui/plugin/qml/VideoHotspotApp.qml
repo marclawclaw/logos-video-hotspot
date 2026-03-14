@@ -1,16 +1,11 @@
 /**
  * VideoHotspotApp.qml — Root component for the Video Hotspot miniapp.
  *
- * Provides tab navigation between:
- *   - UploadScreen   — file/folder picker, upload queue, dedup status
- *   - MapScreen      — interactive map with timeline slider
- *   - CacheScreen    — storage management, user-owned vs cached videos
- *   - SettingsScreen — storage limits, folder monitor, network settings
+ * Tab order: Map → Upload → Downloads → Settings
+ * Map is the default landing tab.
  *
- * Dark mode is the default (field use, nighttime events).
- *
- * Root is a Rectangle (not ApplicationWindow) so this component can be
- * embedded in a QQuickWidget inside Basecamp's tab layout.
+ * Map uses a Canvas for crisp, resolution-independent rendering (no pixel
+ * scaling artefacts). Timeline slider filters pin visibility by time value.
  */
 
 import QtQuick 2.15
@@ -26,8 +21,7 @@ Rectangle {
         id: uploadQueue
     }
 
-    // ── Upload start queue ─────────────────────────────────────────────────
-    // Staggered timer: starts progress animation for each new item in turn
+    // ── Upload animation chain ─────────────────────────────────────────────
     Timer {
         id: progressStarter
         interval: 300
@@ -41,7 +35,6 @@ Rectangle {
             var item = uploadQueue.get(i)
             if (!item.isDuplicate && item.status === "uploading" && !item.animating) {
                 uploadQueue.setProperty(i, "animating", true)
-                // Start this item's progress via the active timer
                 activeProgressTimer.targetIndex = i
                 activeProgressTimer.start()
                 return
@@ -49,7 +42,6 @@ Rectangle {
         }
     }
 
-    // Drives one item's progress at a time, chains to next when done
     Timer {
         id: activeProgressTimer
         interval: 50
@@ -58,10 +50,7 @@ Rectangle {
         property int targetIndex: -1
 
         onTriggered: {
-            if (targetIndex < 0 || targetIndex >= uploadQueue.count) {
-                stop()
-                return
-            }
+            if (targetIndex < 0 || targetIndex >= uploadQueue.count) { stop(); return }
             var item = uploadQueue.get(targetIndex)
             var newProgress = item.progress + 4
             if (newProgress >= 100) {
@@ -69,7 +58,6 @@ Rectangle {
                 uploadQueue.setProperty(targetIndex, "progress", newProgress)
                 uploadQueue.setProperty(targetIndex, "status", "done")
                 stop()
-                // Chain to next pending item
                 progressStarter.start()
             } else {
                 uploadQueue.setProperty(targetIndex, "progress", newProgress)
@@ -77,7 +65,7 @@ Rectangle {
         }
     }
 
-    // ── Mock file names pool ───────────────────────────────────────────────
+    // ── Mock file pool ─────────────────────────────────────────────────────
     property var mockFiles: [
         "event-footage-001.mp4",
         "protest-march-clip2.mp4",
@@ -87,19 +75,9 @@ Rectangle {
     ]
     property int mockFileIndex: 0
 
-    property var mockFolderFiles: [
-        "folder-clip-001.mp4",
-        "folder-clip-002.mp4",
-        "folder-clip-003.mp4"
-    ]
-    property int mockFolderIndex: 0
-
-    // ── Helper: add item to queue, detect duplicates ───────────────────────
     function addToQueue(filename) {
-        // Check for duplicate
         for (var i = 0; i < uploadQueue.count; i++) {
             if (uploadQueue.get(i).filename === filename) {
-                // Mark as dedup
                 uploadQueue.setProperty(i, "isDuplicate", true)
                 return
             }
@@ -111,22 +89,31 @@ Rectangle {
             "isDuplicate": false,
             "animating": false
         })
-        // Kick off animation if nothing is currently running
-        if (!activeProgressTimer.running) {
-            progressStarter.start()
-        }
+        if (!activeProgressTimer.running) progressStarter.start()
+    }
+
+    // ── Map pins data ──────────────────────────────────────────────────────
+    // fx/fy are fractional positions (0‒1) within the map area.
+    // timeValue: 0‒1, represents the pin's point in the demo time range.
+    // Slider value ≥ timeValue → pin fully visible; below → faded.
+    ListModel {
+        id: mapPinsModel
+        ListElement { fx: 0.22; fy: 0.30; timeValue: 0.20; pinColor: "#4a90d9"; label: "clip-a.mp4" }
+        ListElement { fx: 0.38; fy: 0.44; timeValue: 0.38; pinColor: "#ff9800"; label: "clip-b.mp4" }
+        ListElement { fx: 0.55; fy: 0.26; timeValue: 0.55; pinColor: "#4a90d9"; label: "sample1.mp4" }
+        ListElement { fx: 0.70; fy: 0.52; timeValue: 0.72; pinColor: "#4caf50"; label: "archive.mp4" }
+        ListElement { fx: 0.82; fy: 0.38; timeValue: 0.88; pinColor: "#4a90d9"; label: "event-2.mp4" }
     }
 
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
 
-        // ── Title bar ─────────────────────────────────────────────────────
+        // ── Title bar ──────────────────────────────────────────────────────
         Rectangle {
             Layout.fillWidth: true
             height: 40
             color: "#111111"
-
             Text {
                 anchors.centerIn: parent
                 text: "Video Hotspot"
@@ -136,14 +123,14 @@ Rectangle {
             }
         }
 
-        // ── Tab bar ───────────────────────────────────────────────────────
+        // ── Tab bar — Map first ────────────────────────────────────────────
         TabBar {
             id: tabBar
             Layout.fillWidth: true
             background: Rectangle { color: "#222222" }
 
             TabButton {
-                text: "Upload"
+                text: "Map"
                 contentItem: Text {
                     text: parent.text
                     color: tabBar.currentIndex === 0 ? "#4a90d9" : "#aaaaaa"
@@ -155,7 +142,7 @@ Rectangle {
                 }
             }
             TabButton {
-                text: "Map"
+                text: "Upload"
                 contentItem: Text {
                     text: parent.text
                     color: tabBar.currentIndex === 1 ? "#4a90d9" : "#aaaaaa"
@@ -192,13 +179,307 @@ Rectangle {
             }
         }
 
-        // ── Screen stack ──────────────────────────────────────────────────
+        // ── Screen stack ───────────────────────────────────────────────────
         StackLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
             currentIndex: tabBar.currentIndex
 
-            // ── Upload Screen ──────────────────────────────────────────────
+            // ══ 0 — Map Screen ═════════════════════════════════════════════
+            Rectangle {
+                color: "#1a1a1a"
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    spacing: 0
+
+                    // ── Map area: Canvas background + pin overlay ──────────
+                    Item {
+                        id: mapArea
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        // Vector map drawn on Canvas — renders at native DPI,
+                        // no pixel scaling artefacts.
+                        Canvas {
+                            id: mapCanvas
+                            anchors.fill: parent
+
+                            // Repaint whenever the container is resized so
+                            // the map always fills at full resolution.
+                            onWidthChanged:  requestPaint()
+                            onHeightChanged: requestPaint()
+
+                            onPaint: {
+                                var ctx = getContext("2d")
+                                var w = width
+                                var h = height
+
+                                // ── Base terrain ──────────────────────────
+                                ctx.fillStyle = "#1c2b1c"
+                                ctx.fillRect(0, 0, w, h)
+
+                                // ── Tile grid (subtle, thin) ──────────────
+                                ctx.strokeStyle = "#243224"
+                                ctx.lineWidth = 0.5
+                                var tile = 80
+                                ctx.beginPath()
+                                for (var gx = 0; gx < w; gx += tile) {
+                                    ctx.moveTo(gx, 0); ctx.lineTo(gx, h)
+                                }
+                                for (var gy = 0; gy < h; gy += tile) {
+                                    ctx.moveTo(0, gy); ctx.lineTo(w, gy)
+                                }
+                                ctx.stroke()
+
+                                // ── Block fills (simulated city blocks) ───
+                                ctx.fillStyle = "#1e2e1e"
+                                var blocks = [
+                                    [0.10, 0.10, 0.18, 0.22],
+                                    [0.42, 0.12, 0.20, 0.18],
+                                    [0.68, 0.08, 0.14, 0.16],
+                                    [0.08, 0.50, 0.16, 0.20],
+                                    [0.44, 0.48, 0.18, 0.22],
+                                    [0.70, 0.58, 0.16, 0.18],
+                                    [0.20, 0.70, 0.22, 0.16],
+                                    [0.56, 0.74, 0.20, 0.14],
+                                ]
+                                for (var b = 0; b < blocks.length; b++) {
+                                    ctx.fillRect(blocks[b][0]*w, blocks[b][1]*h,
+                                                 blocks[b][2]*w, blocks[b][3]*h)
+                                }
+
+                                // ── Main roads ────────────────────────────
+                                ctx.strokeStyle = "#2e3e2e"
+                                ctx.lineWidth = 14
+                                ctx.lineCap = "round"
+                                // Vertical arterial
+                                ctx.beginPath()
+                                ctx.moveTo(w * 0.36, 0); ctx.lineTo(w * 0.36, h)
+                                ctx.stroke()
+                                // Horizontal arterial
+                                ctx.lineWidth = 10
+                                ctx.beginPath()
+                                ctx.moveTo(0, h * 0.36); ctx.lineTo(w, h * 0.36)
+                                ctx.stroke()
+
+                                // ── Secondary roads ───────────────────────
+                                ctx.strokeStyle = "#283828"
+                                ctx.lineWidth = 6
+                                ctx.beginPath()
+                                ctx.moveTo(w * 0.65, 0); ctx.lineTo(w * 0.65, h)
+                                ctx.stroke()
+                                ctx.beginPath()
+                                ctx.moveTo(0, h * 0.65); ctx.lineTo(w, h * 0.65)
+                                ctx.stroke()
+
+                                // ── Minor streets ─────────────────────────
+                                ctx.strokeStyle = "#243024"
+                                ctx.lineWidth = 2
+                                var minorX = [0.12, 0.28, 0.50, 0.76, 0.90]
+                                var minorY = [0.20, 0.50, 0.80]
+                                ctx.beginPath()
+                                for (var mx = 0; mx < minorX.length; mx++) {
+                                    ctx.moveTo(minorX[mx]*w, 0)
+                                    ctx.lineTo(minorX[mx]*w, h)
+                                }
+                                for (var my = 0; my < minorY.length; my++) {
+                                    ctx.moveTo(0, minorY[my]*h)
+                                    ctx.lineTo(w, minorY[my]*h)
+                                }
+                                ctx.stroke()
+
+                                // ── Road centre-lines (dashed yellow) ─────
+                                ctx.strokeStyle = "#3a4a1a"
+                                ctx.lineWidth = 1
+                                ctx.setLineDash([8, 12])
+                                ctx.beginPath()
+                                ctx.moveTo(w * 0.36, 0); ctx.lineTo(w * 0.36, h)
+                                ctx.stroke()
+                                ctx.beginPath()
+                                ctx.moveTo(0, h * 0.36); ctx.lineTo(w, h * 0.36)
+                                ctx.stroke()
+                                ctx.setLineDash([])
+
+                                // ── Zoom controls (drawn on canvas corner) ─
+                                ctx.fillStyle = "#2a2a2a"
+                                ctx.strokeStyle = "#444444"
+                                ctx.lineWidth = 1
+                                roundRect(ctx, w-44, 16, 28, 28, 4)
+                                ctx.fill(); ctx.stroke()
+                                roundRect(ctx, w-44, 52, 28, 28, 4)
+                                ctx.fill(); ctx.stroke()
+                                ctx.fillStyle = "#f0f0f0"
+                                ctx.font = "bold 18px sans-serif"
+                                ctx.textAlign = "center"
+                                ctx.textBaseline = "middle"
+                                ctx.fillText("+", w-30, 30)
+                                ctx.fillText("−", w-30, 66)
+                            }
+
+                            // Helper: rounded rectangle path
+                            function roundRect(ctx, x, y, w, h, r) {
+                                ctx.beginPath()
+                                ctx.moveTo(x+r, y)
+                                ctx.lineTo(x+w-r, y)
+                                ctx.arcTo(x+w, y,   x+w, y+r,   r)
+                                ctx.lineTo(x+w, y+h-r)
+                                ctx.arcTo(x+w, y+h, x+w-r, y+h, r)
+                                ctx.lineTo(x+r, y+h)
+                                ctx.arcTo(x, y+h,   x, y+h-r,   r)
+                                ctx.lineTo(x, y+r)
+                                ctx.arcTo(x, y,     x+r, y,      r)
+                                ctx.closePath()
+                            }
+                        }
+
+                        // ── Video pin overlay ──────────────────────────────
+                        // Pins are positioned fractionally over the map area.
+                        // Opacity is driven by the timeline slider value:
+                        //   pin.timeValue ≤ slider → fully visible (1.0)
+                        //   pin.timeValue  > slider → faded  (0.15)
+                        Repeater {
+                            model: mapPinsModel
+                            delegate: Item {
+                                id: pinDelegate
+                                x: model.fx * mapArea.width  - 14
+                                y: model.fy * mapArea.height - 14
+                                width: 28
+                                height: 28
+
+                                opacity: model.timeValue <= timelineSlider.value ? 1.0 : 0.15
+                                Behavior on opacity {
+                                    NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
+                                }
+
+                                // Glow ring
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: 28; height: 28; radius: 14
+                                    color: "transparent"
+                                    border.color: model.pinColor
+                                    border.width: 1.5
+                                    opacity: 0.5
+                                }
+                                // Pin body
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: 22; height: 22; radius: 11
+                                    color: model.pinColor
+                                    opacity: 0.88
+                                }
+                                // Play icon
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "▶"
+                                    color: "#ffffff"
+                                    font.pixelSize: 9
+                                    leftPadding: 1
+                                }
+                            }
+                        }
+
+                        // ── "Pins visible" counter ─────────────────────────
+                        Rectangle {
+                            anchors { left: parent.left; top: parent.top; margins: 12 }
+                            width: pinCountText.implicitWidth + 16
+                            height: 24
+                            radius: 4
+                            color: "#1a1a1aCC"
+                            border.color: "#444444"
+                            Text {
+                                id: pinCountText
+                                anchors.centerIn: parent
+                                // Count how many pins are within the slider range
+                                text: {
+                                    var n = 0
+                                    for (var i = 0; i < mapPinsModel.count; i++) {
+                                        if (mapPinsModel.get(i).timeValue <= timelineSlider.value) n++
+                                    }
+                                    return n + " of " + mapPinsModel.count + " videos"
+                                }
+                                color: "#4a90d9"
+                                font.pixelSize: 11
+                                font.family: "monospace"
+                            }
+                        }
+                    }
+
+                    // ── Timeline slider ────────────────────────────────────
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 60
+                        color: "#111111"
+                        border.color: "#333333"
+                        border.width: 0
+                        Rectangle { width: parent.width; height: 1; color: "#333333" }
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: 12
+                            spacing: 12
+
+                            Text {
+                                text: "Timeline:"
+                                color: "#aaaaaa"
+                                font.pixelSize: 12
+                            }
+
+                            Slider {
+                                id: timelineSlider
+                                Layout.fillWidth: true
+                                from: 0; to: 1; value: 0.6
+
+                                background: Rectangle {
+                                    x: timelineSlider.leftPadding
+                                    y: timelineSlider.topPadding + timelineSlider.availableHeight / 2 - height / 2
+                                    width: timelineSlider.availableWidth
+                                    height: 6
+                                    radius: 3
+                                    color: "#333333"
+
+                                    Rectangle {
+                                        width: timelineSlider.visualPosition * parent.width
+                                        height: parent.height
+                                        radius: 3
+                                        color: "#4a90d9"
+                                    }
+                                }
+
+                                handle: Rectangle {
+                                    x: timelineSlider.leftPadding + timelineSlider.visualPosition
+                                       * (timelineSlider.availableWidth - width)
+                                    y: timelineSlider.topPadding + timelineSlider.availableHeight / 2 - height / 2
+                                    width: 18; height: 18; radius: 9
+                                    color: timelineSlider.pressed ? "#6aA0f9" : "#4a90d9"
+                                    border.color: "#ffffff"
+                                    border.width: 1
+                                    Behavior on color { ColorAnimation { duration: 80 } }
+                                }
+                            }
+
+                            Text {
+                                // Show a date label that changes with the slider
+                                text: {
+                                    var base = new Date(2026, 2, 14)  // 2026-03-14
+                                    var offDays = Math.round((1.0 - timelineSlider.value) * 30)
+                                    base.setDate(base.getDate() - offDays)
+                                    var y = base.getFullYear()
+                                    var m = ("0" + (base.getMonth()+1)).slice(-2)
+                                    var d = ("0" + base.getDate()).slice(-2)
+                                    var h = Math.round(timelineSlider.value * 23)
+                                    return y + "-" + m + "-" + d + " " + ("0"+h).slice(-2) + ":00"
+                                }
+                                color: "#4a90d9"
+                                font.pixelSize: 12
+                                font.family: "monospace"
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ══ 1 — Upload Screen ══════════════════════════════════════════
             Rectangle {
                 color: "#1a1a1a"
                 ColumnLayout {
@@ -230,7 +511,6 @@ Rectangle {
                                 horizontalAlignment: Text.AlignHCenter
                             }
                             onClicked: {
-                                // Mock: cycle through sample files
                                 var filename = mockFiles[mockFileIndex % mockFiles.length]
                                 mockFileIndex++
                                 addToQueue(filename)
@@ -251,7 +531,6 @@ Rectangle {
                                 horizontalAlignment: Text.AlignHCenter
                             }
                             onClicked: {
-                                // Mock: add 3 folder clips
                                 addToQueue("folder-clip-001.mp4")
                                 addToQueue("folder-clip-002.mp4")
                                 addToQueue("folder-clip-003.mp4")
@@ -272,8 +551,8 @@ Rectangle {
                                 horizontalAlignment: Text.AlignHCenter
                             }
                             onClicked: {
-                                // Mock: add a folder-monitored file
-                                addToQueue("~/Videos/Hotspot/new-footage-" + Math.floor(Math.random() * 900 + 100) + ".mp4")
+                                addToQueue("~/Videos/Hotspot/new-footage-"
+                                    + Math.floor(Math.random() * 900 + 100) + ".mp4")
                             }
                         }
                     }
@@ -308,7 +587,6 @@ Rectangle {
                         }
                     }
 
-                    // Empty state
                     Rectangle {
                         visible: uploadQueue.count === 0
                         Layout.fillWidth: true
@@ -323,7 +601,6 @@ Rectangle {
                         }
                     }
 
-                    // Queue list
                     ListView {
                         id: queueList
                         visible: uploadQueue.count > 0
@@ -344,13 +621,11 @@ Rectangle {
                                 anchors.margins: 12
                                 spacing: 10
 
-                                // File icon
                                 Text {
                                     text: model.isDuplicate ? "⚠️" : (model.status === "done" ? "✅" : "⏳")
                                     font.pixelSize: 16
                                 }
 
-                                // Filename
                                 Text {
                                     text: model.filename
                                     color: "#f0f0f0"
@@ -359,7 +634,6 @@ Rectangle {
                                     Layout.fillWidth: true
                                 }
 
-                                // Dedup badge
                                 Rectangle {
                                     visible: model.isDuplicate
                                     width: dupLabel.implicitWidth + 16
@@ -376,7 +650,6 @@ Rectangle {
                                     }
                                 }
 
-                                // Done label
                                 Text {
                                     visible: !model.isDuplicate && model.status === "done"
                                     text: "✓ Uploaded"
@@ -384,7 +657,6 @@ Rectangle {
                                     font.pixelSize: 12
                                 }
 
-                                // Progress bar + percent
                                 RowLayout {
                                     visible: !model.isDuplicate && model.status === "uploading"
                                     spacing: 6
@@ -424,82 +696,7 @@ Rectangle {
                 }
             }
 
-            // ── Map Screen ─────────────────────────────────────────────────
-            Rectangle {
-                color: "#1a1a1a"
-                ColumnLayout {
-                    anchors.fill: parent
-                    spacing: 0
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        color: "#1c2b1c"
-
-                        // Placeholder map grid
-                        Grid {
-                            anchors.fill: parent
-                            columns: 8
-                            Repeater {
-                                model: 48
-                                Rectangle {
-                                    width: parent.width / 8
-                                    height: parent.height / 6
-                                    color: index % 3 === 0 ? "#1e2e1e" : (index % 5 === 0 ? "#243024" : "#1c281c")
-                                    border.color: "#162416"
-                                    border.width: 1
-                                }
-                            }
-                        }
-
-                        // Video pins on the map
-                        Rectangle { x: 180; y: 140; width: 14; height: 14; radius: 7; color: "#ff4444" }
-                        Rectangle { x: 320; y: 200; width: 14; height: 14; radius: 7; color: "#ff4444" }
-                        Rectangle { x: 500; y: 120; width: 14; height: 14; radius: 7; color: "#ffaa22" }
-                        Rectangle { x: 650; y: 280; width: 14; height: 14; radius: 7; color: "#ff4444" }
-                        Rectangle { x: 820; y: 180; width: 14; height: 14; radius: 7; color: "#aaffaa" }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Map View — 5 videos indexed"
-                            color: "#44aa44"
-                            font.pixelSize: 14
-                            opacity: 0.7
-                        }
-                    }
-
-                    // Timeline slider
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 60
-                        color: "#111111"
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: 12
-                            spacing: 12
-                            Text { text: "Timeline:"; color: "#aaaaaa"; font.pixelSize: 12 }
-                            Slider {
-                                id: timelineSlider
-                                Layout.fillWidth: true
-                                from: 0; to: 1; value: 0.6
-                                background: Rectangle {
-                                    height: 4; radius: 2
-                                    color: "#333333"
-                                    Rectangle {
-                                        width: parent.width * timelineSlider.value
-                                        height: parent.height
-                                        radius: 2
-                                        color: "#4a90d9"
-                                    }
-                                }
-                            }
-                            Text { text: "2026-03-14 14:00"; color: "#4a90d9"; font.pixelSize: 12 }
-                        }
-                    }
-                }
-            }
-
-            // ── Downloads/Cache Screen ─────────────────────────────────────
+            // ══ 2 — Downloads/Cache Screen ═════════════════════════════════
             Rectangle {
                 color: "#1a1a1a"
                 ColumnLayout {
@@ -514,7 +711,9 @@ Rectangle {
                     }
                     Text { text: "Your Videos (3)"; color: "#aaaaaa"; font.pixelSize: 13; font.bold: true }
                     Repeater {
-                        model: ["sample-event.mp4 — 2.3 MB  ✓ Owned", "march-footage.mp4 — 8.1 MB  ✓ Owned", "clip-b.mp4 — 4.5 MB  ✓ Owned"]
+                        model: ["sample-event.mp4 — 2.3 MB  ✓ Owned",
+                                "march-footage.mp4 — 8.1 MB  ✓ Owned",
+                                "clip-b.mp4 — 4.5 MB  ✓ Owned"]
                         Rectangle {
                             Layout.fillWidth: true; height: 44; color: "#2a2a2a"; radius: 6
                             Text { anchors.centerIn: parent; text: modelData; color: "#f0f0f0"; font.pixelSize: 12 }
@@ -524,7 +723,7 @@ Rectangle {
                 }
             }
 
-            // ── Settings Screen ────────────────────────────────────────────
+            // ══ 3 — Settings Screen ════════════════════════════════════════
             Rectangle {
                 color: "#1a1a1a"
                 ColumnLayout {
@@ -548,7 +747,7 @@ Rectangle {
                             text: "Change"
                             background: Rectangle { color: "#3a3a3a"; radius: 4 }
                             contentItem: Text { text: parent.text; color: "#f0f0f0"; horizontalAlignment: Text.AlignHCenter }
-                            onClicked: { /* mock: would open folder dialog */ }
+                            onClicked: { /* mock */ }
                         }
                     }
                     RowLayout {

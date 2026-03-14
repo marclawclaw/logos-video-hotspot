@@ -1,91 +1,81 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" style="background:#1a1a1a; font-family:sans-serif;">
-<rect x="0" y="0" width="900" height="620" fill="#1a1a1a" rx="0" stroke="none"/>
-<rect x="0" y="0" width="900" height="28" fill="#111111" rx="0" stroke="none"/>
-<circle cx="16" cy="14" r="6" fill="#ff5f57"/>
-<circle cx="34" cy="14" r="6" fill="#febc2e"/>
-<circle cx="52" cy="14" r="6" fill="#28c840"/>
-<text x="450" y="19" fill="#888888" font-size="11" text-anchor="middle" font-weight="normal" font-family="sans-serif">Video Hotspot</text>
-<g transform="translate(0,28)">
-<rect x="0" y="0" width="900" height="44" fill="#3a3a3a" rx="0" stroke="none"/>
-<rect x="0" y="0" width="225" height="44" fill="#3a3a3a" rx="0" stroke="none"/>
-<line x1="0" y1="0" x2="0" y2="44" stroke="#444444" stroke-width="1"/>
-<text x="112" y="27" fill="#888888" font-size="13" text-anchor="middle" font-weight="normal" font-family="sans-serif">Upload</text>
-<rect x="225" y="0" width="225" height="44" fill="#4a90d9" rx="0" stroke="none"/>
-<line x1="225" y1="0" x2="225" y2="44" stroke="#444444" stroke-width="1"/>
-<text x="337" y="27" fill="#f0f0f0" font-size="13" text-anchor="middle" font-weight="bold" font-family="sans-serif">Map</text>
-<rect x="450" y="0" width="225" height="44" fill="#3a3a3a" rx="0" stroke="none"/>
-<line x1="450" y1="0" x2="450" y2="44" stroke="#444444" stroke-width="1"/>
-<text x="562" y="27" fill="#888888" font-size="13" text-anchor="middle" font-weight="normal" font-family="sans-serif">Downloads</text>
-<rect x="675" y="0" width="225" height="44" fill="#3a3a3a" rx="0" stroke="none"/>
-<line x1="675" y1="0" x2="675" y2="44" stroke="#444444" stroke-width="1"/>
-<text x="787" y="27" fill="#888888" font-size="13" text-anchor="middle" font-weight="normal" font-family="sans-serif">Settings</text>
-<rect x="0" y="44" width="900" height="576" fill="#1e2a1e" rx="0" stroke="none"/>
-<line x1="0" y1="44" x2="0" y2="620" stroke="#263326" stroke-width="1"/>
-<line x1="80" y1="44" x2="80" y2="620" stroke="#263326" stroke-width="1"/>
-<line x1="160" y1="44" x2="160" y2="620" stroke="#263326" stroke-width="1"/>
-<line x1="240" y1="44" x2="240" y2="620" stroke="#263326" stroke-width="1"/>
-<line x1="320" y1="44" x2="320" y2="620" stroke="#263326" stroke-width="1"/>
-<line x1="400" y1="44" x2="400" y2="620" stroke="#263326" stroke-width="1"/>
-<line x1="480" y1="44" x2="480" y2="620" stroke="#263326" stroke-width="1"/>
-<line x1="560" y1="44" x2="560" y2="620" stroke="#263326" stroke-width="1"/>
-<line x1="640" y1="44" x2="640" y2="620" stroke="#263326" stroke-width="1"/>
-<line x1="720" y1="44" x2="720" y2="620" stroke="#263326" stroke-width="1"/>
-<line x1="800" y1="44" x2="800" y2="620" stroke="#263326" stroke-width="1"/>
-<line x1="880" y1="44" x2="880" y2="620" stroke="#263326" stroke-width="1"/>
-<line x1="0" y1="44" x2="900" y2="44" stroke="#263326" stroke-width="1"/>
-<line x1="0" y1="124" x2="900" y2="124" stroke="#263326" stroke-width="1"/>
-<line x1="0" y1="204" x2="900" y2="204" stroke="#263326" stroke-width="1"/>
-<line x1="0" y1="284" x2="900" y2="284" stroke="#263326" stroke-width="1"/>
-<line x1="0" y1="364" x2="900" y2="364" stroke="#263326" stroke-width="1"/>
-<line x1="0" y1="444" x2="900" y2="444" stroke="#263326" stroke-width="1"/>
-<line x1="0" y1="524" x2="900" y2="524" stroke="#263326" stroke-width="1"/>
-<line x1="0" y1="604" x2="900" y2="604" stroke="#263326" stroke-width="1"/>
-<line x1="0" y1="244" x2="900" y2="244" stroke="#2d3d2d" stroke-width="8"/>
-<line x1="320" y1="44" x2="320" y2="620" stroke="#2d3d2d" stroke-width="12"/>
-<line x1="600" y1="44" x2="600" y2="620" stroke="#2d3d2d" stroke-width="6"/>
-<line x1="0" y1="424" x2="900" y2="424" stroke="#2d3d2d" stroke-width="6"/>
-<circle cx="280" cy="224" r="14" fill="#4a90d9" opacity="0.85"/>
-<circle cx="280" cy="224" r="14" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.5"/>
-<text x="280" y="229" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">▶</text>
-<circle cx="360" cy="284" r="14" fill="#ff9800" opacity="0.85"/>
-<circle cx="360" cy="284" r="14" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.5"/>
-<text x="360" y="289" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">▶</text>
-<circle cx="520" cy="204" r="14" fill="#4a90d9" opacity="0.85"/>
-<circle cx="520" cy="204" r="14" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.5"/>
-<text x="520" y="209" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">▶</text>
-<circle cx="440" cy="364" r="14" fill="#4caf50" opacity="0.85"/>
-<circle cx="440" cy="364" r="14" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.5"/>
-<text x="440" y="369" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">▶</text>
-<circle cx="650" cy="334" r="14" fill="#4a90d9" opacity="0.85"/>
-<circle cx="650" cy="334" r="14" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.5"/>
-<text x="650" y="339" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">▶</text>
-<rect x="480" y="94" width="200" height="90" fill="#2a2a2a" rx="6" stroke="#4a90d9" stroke-width="1"/>
-<rect x="488" y="102" width="60" height="40" fill="#3a3a3a" rx="3" stroke="none"/>
-<text x="518" y="127" fill="#888888" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif">▶</text>
-<text x="556" y="116" fill="#f0f0f0" font-size="11" text-anchor="start" font-weight="bold" font-family="monospace">sample1.mp4</text>
-<text x="556" y="130" fill="#888888" font-size="10" text-anchor="start" font-weight="normal" font-family="monospace">2026-03-14 11:07</text>
-<text x="556" y="144" fill="#888888" font-size="10" text-anchor="start" font-weight="normal" font-family="monospace">1.7 KB · user-owned</text>
-<rect x="556" y="154" width="70" height="20" fill="#4a90d9" rx="3" stroke="none"/>
-<text x="591" y="168" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">Download</text>
-<line x1="520" y1="184" x2="520" y2="190" stroke="#4a90d9" stroke-width="1"/>
-<rect x="0" y="568" width="900" height="52" fill="#2a2a2a" rx="0" stroke="none"/>
-<line x1="0" y1="568" x2="900" y2="568" stroke="#444444" stroke-width="1"/>
-<rect x="16" y="576" width="50" height="18" fill="#3a3a3a" rx="9" stroke="none"/>
-<text x="41" y="589" fill="#888888" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">hour</text>
-<rect x="74" y="576" width="50" height="18" fill="#4a90d9" rx="9" stroke="none"/>
-<text x="99" y="589" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">day</text>
-<rect x="132" y="576" width="50" height="18" fill="#3a3a3a" rx="9" stroke="none"/>
-<text x="157" y="589" fill="#888888" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">week</text>
-<rect x="190" y="576" width="50" height="18" fill="#3a3a3a" rx="9" stroke="none"/>
-<text x="215" y="589" fill="#888888" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">month</text>
-<rect x="248" y="576" width="50" height="18" fill="#3a3a3a" rx="9" stroke="none"/>
-<text x="273" y="589" fill="#888888" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">year</text>
-<rect x="310" y="582" width="550" height="6" fill="#3a3a3a" rx="3" stroke="none"/>
-<rect x="310" y="582" width="357" height="6" fill="#4a90d9" rx="3" stroke="none"/>
-<circle cx="667" cy="585" r="9" fill="#4a90d9"/>
-<text x="667" y="610" fill="#888888" font-size="10" text-anchor="middle" font-weight="normal" font-family="monospace">2026-03-14</text>
-<rect x="864" y="64" width="28" height="28" fill="#2a2a2a" rx="4" stroke="#444444" stroke-width="1"/>
-<text x="878" y="83" fill="#f0f0f0" font-size="16" text-anchor="middle" font-weight="normal" font-family="sans-serif">+</text>
-<rect x="864" y="98" width="28" height="28" fill="#2a2a2a" rx="4" stroke="#444444" stroke-width="1"/>
-<text x="878" y="117" fill="#f0f0f0" font-size="16" text-anchor="middle" font-weight="normal" font-family="sans-serif">−</text>
-</g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800">
+<rect x="0" y="0" width="1280" height="800" fill="#1a1a1a" rx="0" stroke="none"/>
+<rect x="0" y="0" width="1280" height="40" fill="#111111" rx="0" stroke="none"/>
+<circle cx="18" cy="20" r="7" fill="#ff5f57"/>
+<circle cx="38" cy="20" r="7" fill="#febc2e"/>
+<circle cx="58" cy="20" r="7" fill="#28c840"/>
+<text x="640" y="25" fill="#888888" font-size="12" text-anchor="middle" font-weight="normal" font-family="sans-serif">Video Hotspot</text>
+<rect x="0" y="40" width="1280" height="44" fill="#222222" rx="0" stroke="none"/>
+<rect x="0" y="40" width="320" height="44" fill="#4a90d9" rx="0" stroke="none"/>
+<line x1="0" y1="40" x2="0" y2="84" stroke="#333333" stroke-width="1"/>
+<text x="160" y="67" fill="#f0f0f0" font-size="13" text-anchor="middle" font-weight="bold" font-family="sans-serif">Map</text>
+<rect x="320" y="40" width="320" height="44" fill="#222222" rx="0" stroke="none"/>
+<line x1="320" y1="40" x2="320" y2="84" stroke="#333333" stroke-width="1"/>
+<text x="480" y="67" fill="#888888" font-size="13" text-anchor="middle" font-weight="normal" font-family="sans-serif">Upload</text>
+<rect x="640" y="40" width="320" height="44" fill="#222222" rx="0" stroke="none"/>
+<line x1="640" y1="40" x2="640" y2="84" stroke="#333333" stroke-width="1"/>
+<text x="800" y="67" fill="#888888" font-size="13" text-anchor="middle" font-weight="normal" font-family="sans-serif">Downloads</text>
+<rect x="960" y="40" width="320" height="44" fill="#222222" rx="0" stroke="none"/>
+<line x1="960" y1="40" x2="960" y2="84" stroke="#333333" stroke-width="1"/>
+<text x="1120" y="67" fill="#888888" font-size="13" text-anchor="middle" font-weight="normal" font-family="sans-serif">Settings</text>
+<rect x="0" y="84" width="1280" height="656" fill="#1c2b1c" rx="0" stroke="none"/>
+<path d="M0,84 L0,740 M80,84 L80,740 M160,84 L160,740 M240,84 L240,740 M320,84 L320,740 M400,84 L400,740 M480,84 L480,740 M560,84 L560,740 M640,84 L640,740 M720,84 L720,740 M800,84 L800,740 M880,84 L880,740 M960,84 L960,740 M1040,84 L1040,740 M1120,84 L1120,740 M1200,84 L1200,740 M0,84 L1280,84 M0,164 L1280,164 M0,244 L1280,244 M0,324 L1280,324 M0,404 L1280,404 M0,484 L1280,484 M0,564 L1280,564 M0,644 L1280,644 M0,724 L1280,724 " fill="none" stroke="#243224" stroke-width="0.5" stroke-linecap="round"/>
+<rect x="128" y="149" width="230" height="144" fill="#1e2e1e" rx="0" stroke="none"/>
+<rect x="537" y="162" width="256" height="118" fill="#1e2e1e" rx="0" stroke="none"/>
+<rect x="870" y="136" width="179" height="104" fill="#1e2e1e" rx="0" stroke="none"/>
+<rect x="102" y="412" width="204" height="131" fill="#1e2e1e" rx="0" stroke="none"/>
+<rect x="563" y="398" width="230" height="144" fill="#1e2e1e" rx="0" stroke="none"/>
+<rect x="896" y="464" width="204" height="118" fill="#1e2e1e" rx="0" stroke="none"/>
+<rect x="256" y="543" width="281" height="104" fill="#1e2e1e" rx="0" stroke="none"/>
+<rect x="716" y="569" width="256" height="91" fill="#1e2e1e" rx="0" stroke="none"/>
+<line x1="460" y1="84" x2="460" y2="740" stroke="#2e3e2e" stroke-width="14"/>
+<line x1="0" y1="320" x2="1280" y2="320" stroke="#2e3e2e" stroke-width="10"/>
+<line x1="832" y1="84" x2="832" y2="740" stroke="#283828" stroke-width="6"/>
+<line x1="0" y1="510" x2="1280" y2="510" stroke="#283828" stroke-width="6"/>
+<line x1="153" y1="84" x2="153" y2="740" stroke="#243024" stroke-width="2"/>
+<line x1="358" y1="84" x2="358" y2="740" stroke="#243024" stroke-width="2"/>
+<line x1="640" y1="84" x2="640" y2="740" stroke="#243024" stroke-width="2"/>
+<line x1="972" y1="84" x2="972" y2="740" stroke="#243024" stroke-width="2"/>
+<line x1="1152" y1="84" x2="1152" y2="740" stroke="#243024" stroke-width="2"/>
+<line x1="0" y1="215" x2="1280" y2="215" stroke="#243024" stroke-width="2"/>
+<line x1="0" y1="412" x2="1280" y2="412" stroke="#243024" stroke-width="2"/>
+<line x1="0" y1="608" x2="1280" y2="608" stroke="#243024" stroke-width="2"/>
+<path d="M460,84 L460,740 M0,320 L1280,320" fill="none" stroke="#3a4a1a" stroke-width="1" stroke-linecap="round" stroke-dasharray="8 12"/>
+<circle cx="281" cy="280" r="14" fill="#4a90d9"/>
+<circle cx="281" cy="280" r="14" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.5"/>
+<text x="281" y="285" fill="#f0f0f0" font-size="9" text-anchor="middle" font-weight="bold" font-family="sans-serif">▶</text>
+<circle cx="486" cy="372" r="14" fill="#ff9800"/>
+<circle cx="486" cy="372" r="14" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.5"/>
+<text x="486" y="377" fill="#f0f0f0" font-size="9" text-anchor="middle" font-weight="bold" font-family="sans-serif">▶</text>
+<circle cx="704" cy="254" r="14" fill="#4a90d9"/>
+<circle cx="704" cy="254" r="14" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.5"/>
+<text x="704" y="259" fill="#f0f0f0" font-size="9" text-anchor="middle" font-weight="bold" font-family="sans-serif">▶</text>
+<circle cx="896" cy="425" r="14" fill="#4caf50" opacity="0.15"/>
+<circle cx="896" cy="425" r="14" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.075"/>
+<text x="896" y="430" fill="#f0f0f0" font-size="9" text-anchor="middle" font-weight="bold" font-family="sans-serif">▶</text>
+<circle cx="1049" cy="333" r="14" fill="#4a90d9" opacity="0.15"/>
+<circle cx="1049" cy="333" r="14" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.075"/>
+<text x="1049" y="338" fill="#f0f0f0" font-size="9" text-anchor="middle" font-weight="bold" font-family="sans-serif">▶</text>
+<rect x="664" y="154" width="210" height="90" fill="#2a2a2a" rx="6" stroke="#4a90d9" stroke-width="1"/>
+<rect x="672" y="162" width="58" height="38" fill="#3a3a3a" rx="3" stroke="none"/>
+<text x="701" y="185" fill="#888888" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif">▶</text>
+<text x="738" y="176" fill="#f0f0f0" font-size="11" text-anchor="start" font-weight="bold" font-family="monospace">sample1.mp4</text>
+<text x="738" y="190" fill="#888888" font-size="10" text-anchor="start" font-weight="normal" font-family="monospace">2026-03-14 11:07</text>
+<text x="738" y="204" fill="#888888" font-size="10" text-anchor="start" font-weight="normal" font-family="monospace">1.7 KB · user-owned</text>
+<rect x="738" y="214" width="70" height="20" fill="#4a90d9" rx="3" stroke="none"/>
+<text x="773" y="228" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">Download</text>
+<line x1="704" y1="244" x2="704" y2="240" stroke="#4a90d9" stroke-width="1"/>
+<rect x="12" y="96" width="160" height="24" fill="#2a2a2a" rx="4" stroke="#444444" stroke-width="1"/>
+<text x="20" y="112" fill="#4a90d9" font-size="11" text-anchor="start" font-weight="normal" font-family="monospace">3 of 5 videos</text>
+<rect x="1236" y="100" width="28" height="28" fill="#2a2a2a" rx="4" stroke="#444444" stroke-width="1"/>
+<text x="1250" y="119" fill="#f0f0f0" font-size="16" text-anchor="middle" font-weight="bold" font-family="sans-serif">+</text>
+<rect x="1236" y="136" width="28" height="28" fill="#2a2a2a" rx="4" stroke="#444444" stroke-width="1"/>
+<text x="1250" y="155" fill="#f0f0f0" font-size="16" text-anchor="middle" font-weight="bold" font-family="sans-serif">−</text>
+<rect x="0" y="740" width="1280" height="60" fill="#111111" rx="0" stroke="none"/>
+<line x1="0" y1="740" x2="1280" y2="740" stroke="#333333" stroke-width="1"/>
+<text x="14" y="776" fill="#888888" font-size="12" text-anchor="start" font-weight="normal" font-family="sans-serif">Timeline:</text>
+<rect x="110" y="765" width="1120" height="6" fill="#3a3a3a" rx="3" stroke="none"/>
+<rect x="110" y="765" width="672" height="6" fill="#4a90d9" rx="3" stroke="none"/>
+<circle cx="782" cy="768" r="9" fill="#4a90d9" stroke="#f0f0f0" stroke-width="1"/>
+<text x="782" y="792" fill="#888888" font-size="10" text-anchor="middle" font-weight="normal" font-family="monospace">2026-03-02 14:00</text>
+</svg>
