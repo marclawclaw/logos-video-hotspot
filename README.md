@@ -31,24 +31,22 @@ Video Hotspot adds **spatial intelligence** to collective documentation: indexin
 - [ ] Deduplication: compute content hash before upload — never upload the same file twice
 - [ ] Upload queue with progress indicators and retry logic
 - [ ] Background uploading (continues while browsing map)
-- [ ] **No webcam integration** — import existing files only
 
 #### Timestamp & Geolocation Tagging
 - [ ] Extract timestamp from video file metadata (EXIF/creation date)
 - [ ] If video has EXIF geolocation: use it automatically
 - [ ] If no EXIF geolocation: prompt user to pinpoint location on interactive map
 - [ ] Store precise coordinates + timestamp — no fuzzy zones or clustering for now
-- [ ] **No IP-based geolocation** — never infer location from network data
 
 #### Map Browsing
 - [ ] Interactive map showing video pins at their geolocations
-- [ ] Timeline slider to filter by time range (scrub to see events over time)
+- [ ] Timeline slider with granularity modes: **hour, day, week, month, year** — user selects the granularity; slider scrubs through the selected time unit
 - [ ] Click pin to preview/play video
 - [ ] Zoom and pan across regions
 - [ ] Basic search by location (center map on searched area)
 
 #### Video Playback & Download
-- [ ] Stream videos directly from Logos Storage
+- [ ] Play videos directly from Logos Storage
 - [ ] Download videos for offline viewing
 - [ ] Downloaded videos become seedable (user becomes uploader for that content)
 - [ ] Track which videos are user-owned vs. cached downloads
@@ -95,7 +93,8 @@ The map screen is the core browsing experience:
   - Pin density visualization: areas with many videos show clustered indicators
   - Pins color-coded or sized by recency (brighter/larger = more recent)
 - **Timeline Slider** — Horizontal slider at bottom of screen
-  - Drag to filter videos by time range
+  - Granularity selector: **hour, day, week, month, year**
+  - User selects granularity; slider scrubs through the selected time unit
   - Shows date/time labels at slider position
   - As slider moves, pins appear/disappear based on timestamp
   - "Play" button to animate through time automatically
@@ -117,7 +116,6 @@ Configuration and preferences:
   - Button to change monitored folder
   - Toggle to enable/disable monitoring
 - **Network Settings**
-  - Bootstrap nodes configuration
   - Bandwidth limits (optional)
   - Connection status indicator
 
@@ -146,14 +144,6 @@ Manage local video storage:
 - [ ] Clean, minimal interface — map-centric design
 - [ ] Dark mode default (field use, nighttime events)
 - [ ] Integrates within Basecamp app navigation
-
-#### Language
-- [ ] English only (no localization for now)
-
-#### What's NOT Included
-- [ ] No notifications (no alerts, no push messages)
-- [ ] No content organization (no tags, no collections, no editorial features)
-- [ ] No mesh relay (direct p2p only)
 
 ---
 
@@ -208,7 +198,6 @@ Manage local video storage:
 #### Platform
 - [ ] **Qt miniapp** running inside Basecamp (Logos desktop app)
 - [ ] Cross-platform via Qt: Windows, macOS, Linux
-- [ ] **Not** a standalone Electron/Tauri application
 
 #### Storage Management
 - [ ] User-configurable local storage limits
@@ -236,11 +225,6 @@ Manage local video storage:
 - [ ] Inherits Basecamp's platform support (Windows 10+, macOS 11+, Linux)
 - [ ] Uses Basecamp's Logos stack connections (Messaging, Storage, Blockchain)
 
-#### Out of Scope
-- [ ] Mobile platforms (iOS, Android) — explicitly excluded
-- [ ] Standalone desktop app — must run inside Basecamp
-- [ ] Webcam/camera capture — import existing files only
-
 #### Logos Stack Dependencies
 - [ ] **Logos Messaging** — Real-time indexing
   - Publish video metadata on upload
@@ -253,7 +237,6 @@ Manage local video storage:
   - Indexing only (not proofing/authentication)
 
 #### Security & Privacy
-- [ ] No IP-based geolocation (never)
 - [ ] Metadata minimization: only timestamp + explicit user-provided geolocation
 - [ ] No PII storage
 - [ ] Downloaded videos contribute to network (seeding)
@@ -266,17 +249,9 @@ For initial release:
 
 1. **Upload** — File picker, folder picker, folder monitor, dedup, upload queue
 2. **Geolocation** — EXIF extraction or manual pin placement
-3. **Map View** — Browse pins by location, timeline slider for time filtering
+3. **Map View** — Browse pins by location, timeline slider with granularity modes for time filtering
 4. **Download & Cache** — Download videos, storage management, auto-clean
 5. **Offline Queue** — Capture offline, sync when connected
-
-Out of scope for MVP:
-- Collections/lorelines
-- Tags or content organization
-- Notifications
-- Mobile platforms
-- Webcam capture
-- Multiple languages
 
 ---
 
