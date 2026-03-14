@@ -20,36 +20,43 @@
 <text x="1120" y="67" fill="#888888" font-size="13" text-anchor="middle" font-weight="normal" font-family="sans-serif">Settings</text>
 <text x="24" y="108" fill="#f0f0f0" font-size="18" text-anchor="start" font-weight="bold" font-family="sans-serif">Upload Videos</text>
 <rect x="24" y="140" width="160" height="36" fill="#3a3a3a" rx="4" stroke="none"/>
-<text x="104" y="163" fill="#f0f0f0" font-size="12" text-anchor="middle" font-weight="normal" font-family="sans-serif">📂  Upload File</text>
+<text x="104" y="163" fill="#f0f0f0" font-size="12" text-anchor="middle" font-weight="normal" font-family="sans-serif">Upload File</text>
 <rect x="200" y="140" width="160" height="36" fill="#3a3a3a" rx="4" stroke="none"/>
-<text x="280" y="163" fill="#f0f0f0" font-size="12" text-anchor="middle" font-weight="normal" font-family="sans-serif">📁  Upload Folder</text>
+<text x="280" y="163" fill="#f0f0f0" font-size="12" text-anchor="middle" font-weight="normal" font-family="sans-serif">Upload Folder</text>
 <rect x="376" y="140" width="160" height="36" fill="#2a5a2a" rx="4" stroke="none"/>
-<text x="456" y="163" fill="#aaffaa" font-size="12" text-anchor="middle" font-weight="normal" font-family="sans-serif">👁  Monitor Folder</text>
+<text x="456" y="163" fill="#aaffaa" font-size="12" text-anchor="middle" font-weight="normal" font-family="sans-serif">Monitor Folder</text>
 <line x1="24" y1="196" x2="1256" y2="196" stroke="#444444" stroke-width="1"/>
 <text x="24" y="212" fill="#888888" font-size="13" text-anchor="start" font-weight="bold" font-family="sans-serif">Upload Queue</text>
+<rect x="140" y="200" width="22" height="18" fill="#4a90d9" rx="9" stroke="none"/>
+<text x="151" y="212" fill="#f0f0f0" font-size="11" text-anchor="middle" font-weight="bold" font-family="sans-serif">5</text>
 <rect x="24" y="232" width="1232" height="46" fill="#2a2a2a" rx="5" stroke="none"/>
-<text x="38" y="261" fill="#f0f0f0" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif">✅</text>
-<text x="62" y="254" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">event-footage-001.mp4</text>
-<rect x="1120" y="242" width="110" height="22" fill="#4caf50" rx="11" stroke="none"/>
-<text x="1175" y="257" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">DONE</text>
+<circle cx="44" cy="255" r="10" fill="#4caf50"/>
+<text x="44" y="260" fill="#f0f0f0" font-size="11" text-anchor="middle" font-weight="bold" font-family="sans-serif">✓</text>
+<text x="62" y="259" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">event-footage-001.mp4</text>
+<rect x="1192" y="242" width="48" height="22" fill="#4caf50" rx="11" stroke="none"/>
+<text x="1216" y="257" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">DONE</text>
 <rect x="24" y="284" width="1232" height="46" fill="#2a2a2a" rx="5" stroke="none"/>
-<text x="38" y="313" fill="#f0f0f0" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif">✅</text>
-<text x="62" y="306" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">protest-march-clip2.mp4</text>
-<rect x="1120" y="294" width="110" height="22" fill="#4caf50" rx="11" stroke="none"/>
-<text x="1175" y="309" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">DONE</text>
+<circle cx="44" cy="307" r="10" fill="#4caf50"/>
+<text x="44" y="312" fill="#f0f0f0" font-size="11" text-anchor="middle" font-weight="bold" font-family="sans-serif">✓</text>
+<text x="62" y="311" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">protest-march-clip2.mp4</text>
+<rect x="1192" y="294" width="48" height="22" fill="#4caf50" rx="11" stroke="none"/>
+<text x="1216" y="309" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">DONE</text>
 <rect x="24" y="336" width="1232" height="46" fill="#2a2a2a" rx="5" stroke="none"/>
-<text x="38" y="365" fill="#f0f0f0" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif">✅</text>
-<text x="62" y="358" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">folder-clip-001.mp4</text>
-<rect x="1120" y="346" width="110" height="22" fill="#4caf50" rx="11" stroke="none"/>
-<text x="1175" y="361" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">DONE</text>
+<circle cx="44" cy="359" r="10" fill="#4caf50"/>
+<text x="44" y="364" fill="#f0f0f0" font-size="11" text-anchor="middle" font-weight="bold" font-family="sans-serif">✓</text>
+<text x="62" y="363" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">folder-clip-001.mp4</text>
+<rect x="1192" y="346" width="48" height="22" fill="#4caf50" rx="11" stroke="none"/>
+<text x="1216" y="361" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">DONE</text>
 <rect x="24" y="388" width="1232" height="46" fill="#2a2a2a" rx="5" stroke="none"/>
-<text x="38" y="417" fill="#f0f0f0" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif">✅</text>
-<text x="62" y="410" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">folder-clip-002.mp4</text>
-<rect x="1120" y="398" width="110" height="22" fill="#4caf50" rx="11" stroke="none"/>
-<text x="1175" y="413" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">DONE</text>
+<circle cx="44" cy="411" r="10" fill="#4caf50"/>
+<text x="44" y="416" fill="#f0f0f0" font-size="11" text-anchor="middle" font-weight="bold" font-family="sans-serif">✓</text>
+<text x="62" y="415" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">folder-clip-002.mp4</text>
+<rect x="1192" y="398" width="48" height="22" fill="#4caf50" rx="11" stroke="none"/>
+<text x="1216" y="413" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">DONE</text>
 <rect x="24" y="440" width="1232" height="46" fill="#2a2a2a" rx="5" stroke="none"/>
-<text x="38" y="469" fill="#f0f0f0" font-size="14" text-anchor="middle" font-weight="normal" font-family="sans-serif">⚠️</text>
-<text x="62" y="462" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">event-footage-001.mp4</text>
-<rect x="1120" y="450" width="110" height="22" fill="#ff9800" rx="11" stroke="none"/>
-<text x="1175" y="465" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">DUPLICATE</text>
+<circle cx="44" cy="463" r="10" fill="#ff9800"/>
+<text x="44" y="468" fill="#f0f0f0" font-size="11" text-anchor="middle" font-weight="bold" font-family="sans-serif">!</text>
+<text x="62" y="467" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">event-footage-001.mp4</text>
+<rect x="1157" y="450" width="83" height="22" fill="#ff9800" rx="11" stroke="none"/>
+<text x="1199" y="465" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">DUPLICATE</text>
 </svg>
