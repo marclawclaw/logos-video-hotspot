@@ -60,6 +60,23 @@ Video Hotspot adds **spatial intelligence** to collective documentation: indexin
   - Periodic batches (e.g., 24-hour aggregates) of video metadata committed to blockchain
   - Indexing only — not for proofing or authentication
 
+#### CLI (Headless Mode)
+Command-line interface for scripting, automation, and end-to-end testing. Runs against Logos Core in headless mode (no Qt UI required).
+
+**Commands:**
+- [ ] `upload <file>` — Upload a single video file
+- [ ] `upload-folder <path>` — Upload all videos in a folder
+- [ ] `monitor <path>` — Start monitoring a folder for new videos (foreground process)
+- [ ] `list` — List all indexed videos (timestamp, geolocation, CID)
+- [ ] `download <id>` — Download a video by ID/CID
+- [ ] `status` — Show node status, storage usage, connection state
+- [ ] `cache clear` — Clear cached (non-user-owned) videos
+
+**Output:**
+- [ ] JSON output by default (machine-readable, deterministic)
+- [ ] `--human` flag for human-readable formatted output
+- [ ] Exit codes follow standard conventions (0 = success, non-zero = error)
+
 ---
 
 ### U — Usability
@@ -215,6 +232,12 @@ Manage local video storage:
 - [ ] Storage used / allocated display
 - [ ] Sync status indicators
 - [ ] Folder monitor status
+
+#### CLI & Headless Mode
+- [ ] CLI and Qt UI share the same core module APIs (no duplicate logic)
+- [ ] Logos Core runs in headless mode when CLI is invoked (no window spawned)
+- [ ] CLI commands are scriptable and deterministic (designed for e2e testing)
+- [ ] CLI exit codes and JSON output enable automated test harnesses
 
 ---
 
