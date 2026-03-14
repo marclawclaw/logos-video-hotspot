@@ -13,6 +13,8 @@
 
 #include <QApplication>
 #include <QWidget>
+#include <cstdio>
+#include <unistd.h>
 
 int main(int argc, char* argv[])
 {
@@ -20,6 +22,10 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
     app.setApplicationName("VideoHotspot");
     app.setApplicationVersion("0.1.0");
+
+    // Print a clear proof-of-launch message with the real PID
+    std::printf("logos-video-hotspot UI started (pid: %d)\n", (int)getpid());
+    std::fflush(stdout);
 
     VideoHotspotPlugin plugin;
 

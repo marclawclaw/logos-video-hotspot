@@ -21,6 +21,102 @@ Rectangle {
     id: root
     color: "#1a1a1a"
 
+    // ── Upload queue data model ────────────────────────────────────────────
+    ListModel {
+        id: uploadQueue
+    }
+
+    // ── Upload start queue ─────────────────────────────────────────────────
+    // Staggered timer: starts progress animation for each new item in turn
+    Timer {
+        id: progressStarter
+        interval: 300
+        repeat: false
+        running: false
+        onTriggered: startNextPendingUpload()
+    }
+
+    function startNextPendingUpload() {
+        for (var i = 0; i < uploadQueue.count; i++) {
+            var item = uploadQueue.get(i)
+            if (!item.isDuplicate && item.status === "uploading" && !item.animating) {
+                uploadQueue.setProperty(i, "animating", true)
+                // Start this item's progress via the active timer
+                activeProgressTimer.targetIndex = i
+                activeProgressTimer.start()
+                return
+            }
+        }
+    }
+
+    // Drives one item's progress at a time, chains to next when done
+    Timer {
+        id: activeProgressTimer
+        interval: 50
+        repeat: true
+        running: false
+        property int targetIndex: -1
+
+        onTriggered: {
+            if (targetIndex < 0 || targetIndex >= uploadQueue.count) {
+                stop()
+                return
+            }
+            var item = uploadQueue.get(targetIndex)
+            var newProgress = item.progress + 4
+            if (newProgress >= 100) {
+                newProgress = 100
+                uploadQueue.setProperty(targetIndex, "progress", newProgress)
+                uploadQueue.setProperty(targetIndex, "status", "done")
+                stop()
+                // Chain to next pending item
+                progressStarter.start()
+            } else {
+                uploadQueue.setProperty(targetIndex, "progress", newProgress)
+            }
+        }
+    }
+
+    // ── Mock file names pool ───────────────────────────────────────────────
+    property var mockFiles: [
+        "event-footage-001.mp4",
+        "protest-march-clip2.mp4",
+        "rally-coverage.mp4",
+        "night-session.mp4",
+        "field-report-hd.mp4"
+    ]
+    property int mockFileIndex: 0
+
+    property var mockFolderFiles: [
+        "folder-clip-001.mp4",
+        "folder-clip-002.mp4",
+        "folder-clip-003.mp4"
+    ]
+    property int mockFolderIndex: 0
+
+    // ── Helper: add item to queue, detect duplicates ───────────────────────
+    function addToQueue(filename) {
+        // Check for duplicate
+        for (var i = 0; i < uploadQueue.count; i++) {
+            if (uploadQueue.get(i).filename === filename) {
+                // Mark as dedup
+                uploadQueue.setProperty(i, "isDuplicate", true)
+                return
+            }
+        }
+        uploadQueue.append({
+            "filename": filename,
+            "progress": 0,
+            "status": "uploading",
+            "isDuplicate": false,
+            "animating": false
+        })
+        // Kick off animation if nothing is currently running
+        if (!activeProgressTimer.running) {
+            progressStarter.start()
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
@@ -119,20 +215,66 @@ Rectangle {
 
                     RowLayout {
                         spacing: 12
+
                         Button {
-                            text: "📂  Select File"
-                            background: Rectangle { color: "#3a3a3a"; radius: 4 }
-                            contentItem: Text { text: parent.text; color: "#f0f0f0"; horizontalAlignment: Text.AlignHCenter }
+                            id: uploadFileBtn
+                            text: "📂  Upload File"
+                            background: Rectangle {
+                                color: uploadFileBtn.pressed ? "#4a4a4a" : (uploadFileBtn.hovered ? "#454545" : "#3a3a3a")
+                                radius: 4
+                                Behavior on color { ColorAnimation { duration: 80 } }
+                            }
+                            contentItem: Text {
+                                text: parent.text
+                                color: "#f0f0f0"
+                                horizontalAlignment: Text.AlignHCenter
+                            }
+                            onClicked: {
+                                // Mock: cycle through sample files
+                                var filename = mockFiles[mockFileIndex % mockFiles.length]
+                                mockFileIndex++
+                                addToQueue(filename)
+                            }
                         }
+
                         Button {
-                            text: "📁  Select Folder"
-                            background: Rectangle { color: "#3a3a3a"; radius: 4 }
-                            contentItem: Text { text: parent.text; color: "#f0f0f0"; horizontalAlignment: Text.AlignHCenter }
+                            id: uploadFolderBtn
+                            text: "📁  Upload Folder"
+                            background: Rectangle {
+                                color: uploadFolderBtn.pressed ? "#4a4a4a" : (uploadFolderBtn.hovered ? "#454545" : "#3a3a3a")
+                                radius: 4
+                                Behavior on color { ColorAnimation { duration: 80 } }
+                            }
+                            contentItem: Text {
+                                text: parent.text
+                                color: "#f0f0f0"
+                                horizontalAlignment: Text.AlignHCenter
+                            }
+                            onClicked: {
+                                // Mock: add 3 folder clips
+                                addToQueue("folder-clip-001.mp4")
+                                addToQueue("folder-clip-002.mp4")
+                                addToQueue("folder-clip-003.mp4")
+                            }
                         }
+
                         Button {
+                            id: monitorBtn
                             text: "👁  Monitor Folder"
-                            background: Rectangle { color: "#2a5a2a"; radius: 4 }
-                            contentItem: Text { text: parent.text; color: "#aaffaa"; horizontalAlignment: Text.AlignHCenter }
+                            background: Rectangle {
+                                color: monitorBtn.pressed ? "#3a6a3a" : (monitorBtn.hovered ? "#306030" : "#2a5a2a")
+                                radius: 4
+                                Behavior on color { ColorAnimation { duration: 80 } }
+                            }
+                            contentItem: Text {
+                                text: parent.text
+                                color: "#aaffaa"
+                                horizontalAlignment: Text.AlignHCenter
+                            }
+                            onClicked: {
+                                // Mock: add a folder-monitored file
+                                addToQueue("~/Videos/Hotspot/new-footage-" + Math.floor(Math.random() * 900 + 100) + ".mp4")
+                            }
                         }
                     }
 
@@ -142,47 +284,143 @@ Rectangle {
                         color: "#333333"
                     }
 
-                    Text {
-                        text: "Upload Queue"
-                        color: "#aaaaaa"
-                        font.pixelSize: 13
-                        font.bold: true
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        height: 60
-                        color: "#2a2a2a"
-                        radius: 6
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: 12
-                            Text { text: "sample-event-footage.mp4"; color: "#f0f0f0"; font.pixelSize: 13 }
-                            Item { Layout.fillWidth: true }
-                            Rectangle {
-                                width: 120; height: 20; radius: 3
-                                color: "#333333"
-                                Rectangle { width: parent.width * 0.72; height: parent.height; radius: 3; color: "#4a90d9" }
+                    RowLayout {
+                        Text {
+                            text: "Upload Queue"
+                            color: "#aaaaaa"
+                            font.pixelSize: 13
+                            font.bold: true
+                        }
+                        Rectangle {
+                            visible: uploadQueue.count > 0
+                            width: queueCountLabel.implicitWidth + 12
+                            height: 18
+                            radius: 9
+                            color: "#4a90d9"
+                            Text {
+                                id: queueCountLabel
+                                anchors.centerIn: parent
+                                text: uploadQueue.count
+                                color: "#ffffff"
+                                font.pixelSize: 11
+                                font.bold: true
                             }
-                            Text { text: "72%"; color: "#4a90d9"; font.pixelSize: 12 }
                         }
                     }
 
+                    // Empty state
                     Rectangle {
+                        visible: uploadQueue.count === 0
                         Layout.fillWidth: true
-                        height: 60
-                        color: "#2a2a2a"
+                        height: 80
+                        color: "#222222"
                         radius: 6
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.margins: 12
-                            Text { text: "protest-march-clip2.mp4"; color: "#f0f0f0"; font.pixelSize: 13 }
-                            Item { Layout.fillWidth: true }
-                            Text { text: "✓ Already uploaded"; color: "#ffaa44"; font.pixelSize: 12 }
+                        Text {
+                            anchors.centerIn: parent
+                            text: "No files queued — click Upload File or Upload Folder to start"
+                            color: "#666666"
+                            font.pixelSize: 12
                         }
                     }
 
-                    Item { Layout.fillHeight: true }
+                    // Queue list
+                    ListView {
+                        id: queueList
+                        visible: uploadQueue.count > 0
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        model: uploadQueue
+                        spacing: 8
+                        clip: true
+
+                        delegate: Rectangle {
+                            width: queueList.width
+                            height: 60
+                            color: "#2a2a2a"
+                            radius: 6
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                spacing: 10
+
+                                // File icon
+                                Text {
+                                    text: model.isDuplicate ? "⚠️" : (model.status === "done" ? "✅" : "⏳")
+                                    font.pixelSize: 16
+                                }
+
+                                // Filename
+                                Text {
+                                    text: model.filename
+                                    color: "#f0f0f0"
+                                    font.pixelSize: 12
+                                    elide: Text.ElideMiddle
+                                    Layout.fillWidth: true
+                                }
+
+                                // Dedup badge
+                                Rectangle {
+                                    visible: model.isDuplicate
+                                    width: dupLabel.implicitWidth + 16
+                                    height: 22
+                                    radius: 11
+                                    color: "#aa6600"
+                                    Text {
+                                        id: dupLabel
+                                        anchors.centerIn: parent
+                                        text: "DUPLICATE"
+                                        color: "#ffcc88"
+                                        font.pixelSize: 10
+                                        font.bold: true
+                                    }
+                                }
+
+                                // Done label
+                                Text {
+                                    visible: !model.isDuplicate && model.status === "done"
+                                    text: "✓ Uploaded"
+                                    color: "#44cc44"
+                                    font.pixelSize: 12
+                                }
+
+                                // Progress bar + percent
+                                RowLayout {
+                                    visible: !model.isDuplicate && model.status === "uploading"
+                                    spacing: 6
+
+                                    Rectangle {
+                                        width: 120
+                                        height: 20
+                                        radius: 3
+                                        color: "#333333"
+
+                                        Rectangle {
+                                            width: parent.width * (model.progress / 100)
+                                            height: parent.height
+                                            radius: 3
+                                            color: "#4a90d9"
+                                            Behavior on width {
+                                                NumberAnimation { duration: 60 }
+                                            }
+                                        }
+                                    }
+
+                                    Text {
+                                        text: model.progress + "%"
+                                        color: "#4a90d9"
+                                        font.pixelSize: 12
+                                        Layout.preferredWidth: 36
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Item {
+                        Layout.fillHeight: true
+                        visible: uploadQueue.count === 0
+                    }
                 }
             }
 
@@ -241,12 +479,18 @@ Rectangle {
                             spacing: 12
                             Text { text: "Timeline:"; color: "#aaaaaa"; font.pixelSize: 12 }
                             Slider {
+                                id: timelineSlider
                                 Layout.fillWidth: true
                                 from: 0; to: 1; value: 0.6
                                 background: Rectangle {
                                     height: 4; radius: 2
                                     color: "#333333"
-                                    Rectangle { width: parent.width * 0.6; height: parent.height; radius: 2; color: "#4a90d9" }
+                                    Rectangle {
+                                        width: parent.width * timelineSlider.value
+                                        height: parent.height
+                                        radius: 2
+                                        color: "#4a90d9"
+                                    }
                                 }
                             }
                             Text { text: "2026-03-14 14:00"; color: "#4a90d9"; font.pixelSize: 12 }
@@ -290,8 +534,11 @@ Rectangle {
                     Text { text: "Settings"; color: "#f0f0f0"; font.pixelSize: 20; font.bold: true }
                     RowLayout {
                         Text { text: "Storage limit:"; color: "#aaaaaa"; font.pixelSize: 13; Layout.preferredWidth: 160 }
-                        Slider { from: 1; to: 50; value: 10; Layout.fillWidth: true }
-                        Text { text: "10 GB"; color: "#4a90d9"; font.pixelSize: 13 }
+                        Slider {
+                            id: storageSlider
+                            from: 1; to: 50; value: 10; Layout.fillWidth: true
+                        }
+                        Text { text: Math.round(storageSlider.value) + " GB"; color: "#4a90d9"; font.pixelSize: 13 }
                     }
                     RowLayout {
                         Text { text: "Monitor folder:"; color: "#aaaaaa"; font.pixelSize: 13; Layout.preferredWidth: 160 }
@@ -301,6 +548,7 @@ Rectangle {
                             text: "Change"
                             background: Rectangle { color: "#3a3a3a"; radius: 4 }
                             contentItem: Text { text: parent.text; color: "#f0f0f0"; horizontalAlignment: Text.AlignHCenter }
+                            onClicked: { /* mock: would open folder dialog */ }
                         }
                     }
                     RowLayout {
