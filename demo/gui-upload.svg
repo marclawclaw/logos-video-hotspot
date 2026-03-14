@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" style="background:#1a1a1a; font-family:sans-serif;">
+<rect x="0" y="0" width="900" height="620" fill="#1a1a1a" rx="0" stroke="none"/>
+<rect x="0" y="0" width="900" height="28" fill="#111111" rx="0" stroke="none"/>
+<circle cx="16" cy="14" r="6" fill="#ff5f57"/>
+<circle cx="34" cy="14" r="6" fill="#febc2e"/>
+<circle cx="52" cy="14" r="6" fill="#28c840"/>
+<text x="450" y="19" fill="#888888" font-size="11" text-anchor="middle" font-weight="normal" font-family="sans-serif">Video Hotspot</text>
+<g transform="translate(0,28)">
+<rect x="0" y="0" width="900" height="44" fill="#3a3a3a" rx="0" stroke="none"/>
+<rect x="0" y="0" width="225" height="44" fill="#4a90d9" rx="0" stroke="none"/>
+<line x1="0" y1="0" x2="0" y2="44" stroke="#444444" stroke-width="1"/>
+<text x="112" y="27" fill="#f0f0f0" font-size="13" text-anchor="middle" font-weight="bold" font-family="sans-serif">Upload</text>
+<rect x="225" y="0" width="225" height="44" fill="#3a3a3a" rx="0" stroke="none"/>
+<line x1="225" y1="0" x2="225" y2="44" stroke="#444444" stroke-width="1"/>
+<text x="337" y="27" fill="#888888" font-size="13" text-anchor="middle" font-weight="normal" font-family="sans-serif">Map</text>
+<rect x="450" y="0" width="225" height="44" fill="#3a3a3a" rx="0" stroke="none"/>
+<line x1="450" y1="0" x2="450" y2="44" stroke="#444444" stroke-width="1"/>
+<text x="562" y="27" fill="#888888" font-size="13" text-anchor="middle" font-weight="normal" font-family="sans-serif">Downloads</text>
+<rect x="675" y="0" width="225" height="44" fill="#3a3a3a" rx="0" stroke="none"/>
+<line x1="675" y1="0" x2="675" y2="44" stroke="#444444" stroke-width="1"/>
+<text x="787" y="27" fill="#888888" font-size="13" text-anchor="middle" font-weight="normal" font-family="sans-serif">Settings</text>
+<text x="24" y="64" fill="#f0f0f0" font-size="16" text-anchor="start" font-weight="bold" font-family="sans-serif">Upload Videos</text>
+<rect x="24" y="92" width="160" height="34" fill="#4a90d9" rx="4" stroke="none"/>
+<text x="104" y="114" fill="#f0f0f0" font-size="12" text-anchor="middle" font-weight="normal" font-family="sans-serif">Choose File</text>
+<rect x="200" y="92" width="160" height="34" fill="#3a3a3a" rx="4" stroke="#4a90d9" stroke-width="1"/>
+<text x="280" y="114" fill="#4a90d9" font-size="12" text-anchor="middle" font-weight="normal" font-family="sans-serif">Choose Folder</text>
+<text x="400" y="114" fill="#888888" font-size="12" text-anchor="start" font-weight="normal" font-family="sans-serif">Folder monitor:</text>
+<rect x="510" y="99" width="40" height="20" fill="#4caf50" rx="10" stroke="none"/>
+<circle cx="540" cy="109" r="8" fill="#f0f0f0"/>
+<text x="558" y="114" fill="#4caf50" font-size="11" text-anchor="start" font-weight="bold" font-family="sans-serif">ON</text>
+<line x1="24" y1="146" x2="876" y2="146" stroke="#444444" stroke-width="1"/>
+<text x="24" y="158" fill="#888888" font-size="11" text-anchor="start" font-weight="normal" font-family="sans-serif">Upload Queue</text>
+<rect x="24" y="174" width="852" height="38" fill="#2a2a2a" rx="4" stroke="none"/>
+<rect x="30" y="179" width="44" height="28" fill="#3a3a3a" rx="2" stroke="none"/>
+<text x="52" y="198" fill="#888888" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">▶</text>
+<text x="84" y="188" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">sample1.mp4</text>
+<text x="84" y="202" fill="#888888" font-size="10" text-anchor="start" font-weight="normal" font-family="monospace">1.7 KB</text>
+<rect x="240" y="192" width="380" height="6" fill="#3a3a3a" rx="3" stroke="none"/><rect x="240" y="192" width="380" height="6" fill="#4caf50" rx="3" stroke="none"/>
+<rect x="752" y="184" width="86" height="18" fill="#4caf50" rx="9" stroke="none"/>
+<text x="795" y="197" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">complete</text>
+<rect x="24" y="220" width="852" height="38" fill="#2a2a2a" rx="4" stroke="none"/>
+<rect x="30" y="225" width="44" height="28" fill="#3a3a3a" rx="2" stroke="none"/>
+<text x="52" y="244" fill="#888888" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">▶</text>
+<text x="84" y="234" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">sample1.mp4</text>
+<text x="84" y="248" fill="#888888" font-size="10" text-anchor="start" font-weight="normal" font-family="monospace">1.7 KB</text>
+<rect x="240" y="238" width="380" height="6" fill="#3a3a3a" rx="3" stroke="none"/><rect x="240" y="238" width="380" height="6" fill="#ff9800" rx="3" stroke="none"/>
+<rect x="752" y="230" width="86" height="18" fill="#ff9800" rx="9" stroke="none"/>
+<text x="795" y="243" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">duplicate</text>
+<rect x="24" y="266" width="852" height="38" fill="#2a2a2a" rx="4" stroke="none"/>
+<rect x="30" y="271" width="44" height="28" fill="#3a3a3a" rx="2" stroke="none"/>
+<text x="52" y="290" fill="#888888" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">▶</text>
+<text x="84" y="280" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">folder-demo/clip-a.mp4</text>
+<text x="84" y="294" fill="#888888" font-size="10" text-anchor="start" font-weight="normal" font-family="monospace">1.7 KB</text>
+<rect x="240" y="284" width="380" height="6" fill="#3a3a3a" rx="3" stroke="none"/><rect x="240" y="284" width="380" height="6" fill="#4caf50" rx="3" stroke="none"/>
+<rect x="752" y="276" width="86" height="18" fill="#4caf50" rx="9" stroke="none"/>
+<text x="795" y="289" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">complete</text>
+<rect x="24" y="312" width="852" height="38" fill="#2a2a2a" rx="4" stroke="none"/>
+<rect x="30" y="317" width="44" height="28" fill="#3a3a3a" rx="2" stroke="none"/>
+<text x="52" y="336" fill="#888888" font-size="10" text-anchor="middle" font-weight="normal" font-family="sans-serif">▶</text>
+<text x="84" y="326" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="normal" font-family="monospace">folder-demo/clip-b.mp4</text>
+<text x="84" y="340" fill="#888888" font-size="10" text-anchor="start" font-weight="normal" font-family="monospace">1.7 KB</text>
+<rect x="240" y="330" width="380" height="6" fill="#3a3a3a" rx="3" stroke="none"/><rect x="240" y="330" width="380" height="6" fill="#4caf50" rx="3" stroke="none"/>
+<rect x="752" y="322" width="86" height="18" fill="#4caf50" rx="9" stroke="none"/>
+<text x="795" y="335" fill="#f0f0f0" font-size="10" text-anchor="middle" font-weight="bold" font-family="sans-serif">complete</text>
+</g></svg>

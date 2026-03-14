@@ -2,6 +2,138 @@
 
 > **Privacy-preserving video upload and geolocation-based event mapping on the Logos stack**
 
+## Demo
+
+### CLI
+
+![CLI demo](demo/cli-demo.gif)
+
+### GUI (Upload tab · Map tab)
+
+| Upload Screen | Map Screen |
+|:---:|:---:|
+| ![Upload](demo/gui-upload.svg) | ![Map](demo/gui-map.svg) |
+
+> **Note:** The Qt GUI requires `Qt6Quick` and a display. The screenshots above are
+> generated mockups of `VideoHotspotApp.qml`. To run the real app:
+> ```
+> cmake -DBUILD_UI_APP=ON ..
+> make video-hotspot-app
+> ./video-hotspot-app
+> ```
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- Qt 6 (Core, Concurrent, Network, Sql)
+- CMake ≥ 3.22, C++17 compiler
+
+### Build
+
+```bash
+git clone <repo>
+cd logos-video-hotspot
+cmake -B build
+cmake --build build
+```
+
+The CLI binary lands at `build/cli/video-hotspot`.
+
+### CLI Usage
+
+All commands support `--human` (`-H`) for human-readable output, or emit JSON by default.
+
+#### Check node status
+
+```bash
+./build/cli/video-hotspot status --human
+# Logos connection: connected (mock)
+# Videos indexed:   0
+# Pending messages: 0
+# User-owned bytes: 0
+# Cached bytes:     0
+# Total used:       0
+```
+
+#### Upload a single video
+
+```bash
+./build/cli/video-hotspot upload path/to/video.mp4 --human
+# Uploaded: path/to/video.mp4
+# CID:      44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a
+```
+
+#### Deduplication — upload the same file again
+
+```bash
+./build/cli/video-hotspot upload path/to/video.mp4 --human
+# Duplicate: path/to/video.mp4
+# CID:       44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a (already uploaded)
+```
+
+#### Upload all videos in a folder
+
+```bash
+./build/cli/video-hotspot upload-folder path/to/folder --human
+# Uploaded: path/to/folder/clip-a.mp4
+# CID:      dc325b95ab25d5e15f41fc5253860bf8986a068875438c1cfca1f5ccc231ec36
+# Uploaded: path/to/folder/clip-b.mp4
+# CID:      8ec7e4b5670438b9e2044735dad688319ccd71480e1eae81710b12a94835614e
+# Queued 2 file(s)...
+#
+# Summary: 2 uploaded, 0 failed
+```
+
+#### List indexed videos
+
+```bash
+./build/cli/video-hotspot list --human
+# Total: 3 video(s)
+#   CID:  44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a
+#   Geo:  0, 0
+#   Time: 2026-03-14T11:07:00Z
+#   Size: 1730 bytes
+#   Type: video/mp4
+#   Owned: yes
+#   ...
+```
+
+#### Download a video by CID
+
+```bash
+./build/cli/video-hotspot download 44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a ./downloads --human
+# cid: 44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a
+# local_path: ./downloads/44da7506d4de4d647af7ebffad3893e8ff7c0cefee50c573fc1660b17f2bc78a
+# status: ok
+```
+
+#### Clear cached (non-user-owned) videos
+
+```bash
+./build/cli/video-hotspot cache clear --human
+# cleared_bytes: 0
+# cleared_count: 0
+# status: ok
+```
+
+#### JSON output (default, no flag needed)
+
+```bash
+./build/cli/video-hotspot status
+# {"cached_bytes":0,"connected":true,"index_count":0,"mode":"mock","pending_messages":0,"status":"ok","total_used_bytes":0,"user_owned_bytes":0}
+```
+
+#### Monitor a folder for new videos (foreground process)
+
+```bash
+./build/cli/video-hotspot monitor path/to/folder
+```
+
+---
+
 ## Overview
 
 Video Hotspot is a Qt miniapp running inside the Logos app ("Basecamp") for uploading, storing, and collectively mapping events through video footage. Users import video files that are tagged with timestamp and geolocation. The system indexes these clips by location and time, allowing anyone to browse a live map of documented events.
