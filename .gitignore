@@ -1,0 +1,36 @@
+# Build directories
+build/
+cmake-build-*/
+result/
+
+# Qt / CMake generated
+*.user
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+CTestTestfile.cmake
+
+# Nix
+.direnv/
+
+# Binaries
+*.so
+*.dylib
+*.dll
+*.exe
+*.AppImage
+
+# Qt intermediates
+moc_*.cpp
+*.moc
+qrc_*.cpp
+ui_*.h
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
