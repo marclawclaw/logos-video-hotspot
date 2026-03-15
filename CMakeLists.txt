@@ -152,6 +152,45 @@ else()
 endif()
 
 # ---------------------------------------------------------------------------
+# Logos daemon runtime dependency declaration
+# ---------------------------------------------------------------------------
+# When LOGOS_CORE_AVAILABLE is set, the Logos daemon must be running (started
+# automatically by logos-app) for SDK mode to work at runtime.
+#
+# Required Logos modules:
+#   - Codex  ("codex"  / "CodexReplica")  — decentralised storage backend
+#   - Waku   ("waku"   / "WakuReplica")   — p2p messaging transport
+#
+# The daemon auto-starts when logos-app launches; these modules must be loaded.
+# ---------------------------------------------------------------------------
+message(STATUS "Logos daemon runtime deps: Codex (codex/CodexReplica), Waku (waku/WakuReplica)")
+
+configure_file(
+    "${CMAKE_SOURCE_DIR}/packaging/logos-daemon-deps.txt.in"
+    "${CMAKE_BINARY_DIR}/logos-daemon-deps.txt"
+    @ONLY
+)
+
+install(FILES "${CMAKE_BINARY_DIR}/logos-daemon-deps.txt"
+        DESTINATION share/video-hotspot)
+
+# ---------------------------------------------------------------------------
+# CPack — declare Logos daemon as a runtime packaging dependency
+# ---------------------------------------------------------------------------
+# The Logos daemon auto-starts via logos-app; no separate systemd service is
+# needed — the app handles daemon lifecycle.  We only declare the package
+# dependency so that package managers pull it in automatically.
+# ---------------------------------------------------------------------------
+set(CPACK_PACKAGE_NAME "video-hotspot")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Video hotspot overlay for Logos")
+
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "logos-daemon (>= 0.1), logos-app (>= 0.1)")
+set(CPACK_RPM_PACKAGE_REQUIRES   "logos-daemon >= 0.1, logos-app >= 0.1")
+
+include(CPack)
+
+# ---------------------------------------------------------------------------
 # CLI frontend (headless — no Qt6::Widgets / Qt6::Quick)
 # ---------------------------------------------------------------------------
 add_subdirectory(cli)
