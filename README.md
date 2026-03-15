@@ -301,12 +301,62 @@ Video Hotspot adds **spatial intelligence** to collective documentation: indexin
 
 #### Map Browsing
 - [ ] Interactive map showing video pins at their geolocations
-- [ ] Timeline slider with granularity modes: **hour, day, week, month, year** — user selects the granularity; slider scrubs through the selected time unit
 - [ ] Click pin to preview/play video
 - [ ] Zoom and pan across regions
 - [ ] Basic search by location (center map on searched area)
 
 > **Note:** Map UI is a vector mockup (Canvas-rendered, no pixel artefacts); pins respond to the timeline slider with animated opacity fades. Real interactive map, pin data from index, and granularity buttons are pending SDK integration.
+
+#### Timeline Component (Video Scrubber)
+A proper video-scrubber-style timeline replaces the basic range slider. This component shows **where data exists** in time and provides a playback-style UX for temporal navigation.
+
+##### Visual Design
+- [ ] **Track bar** — Horizontal bar at bottom of map screen (~48–64px tall)
+- [ ] **Data heatmap overlay** — On the track itself, render density indicators showing where video data exists in time (similar to YouTube's "most replayed" heatmap)
+  - Computed per-bucket: divide visible time range into N buckets (e.g., 100), count videos per bucket
+  - Render as translucent bars or gradient overlay on track (higher density = taller bar / warmer color)
+  - Empty time ranges show flat/dim track — user sees at a glance where content exists
+- [ ] **Playhead** — Vertical line/marker indicating current time position
+  - Draggable handle on top of playhead for scrubbing
+  - Current timestamp displayed above or beside playhead (e.g., "2026-03-14 14:30")
+- [ ] **Time axis labels** — Start and end timestamps of visible range displayed at track edges
+- [ ] **Granularity button** — Single cycle button to toggle time granularity
+  - Cycles through: **hour → day → week → month → year → hour...**
+  - Displays current granularity as icon+label (e.g., 📅 Day)
+  - One tap advances to next granularity level
+- [ ] **Play/Pause button** — Animate playhead forward through time automatically
+
+##### Interaction Model
+- [ ] **Drag playhead** — Click and drag the playhead handle to scrub through time; map pins animate (appear/fade) in real-time as playhead moves
+- [ ] **Click to jump** — Click anywhere on the track to jump playhead to that position
+- [ ] **Scrub velocity** — Fast drag = fast scrub; slow drag = precise scrub
+- [ ] **Granularity cycle** — Tap the granularity button to cycle to the next level; the track re-renders with a new time scale
+  - Hour granularity: 1h increments, ~24h visible range
+  - Day granularity: 1d increments, ~30d visible range
+  - Week granularity: 1w increments, ~3 months visible range
+  - Month granularity: 1mo increments, ~1 year visible range
+  - Year granularity: 1y increments, ~10 years visible range
+- [ ] **Play mode** — Press play to auto-advance playhead; playhead moves forward one increment per second (configurable)
+- [ ] **Keyboard shortcuts** — Left/Right arrows to step playhead; Space to play/pause
+
+##### Data Density Computation
+- [ ] Query IndexingService for video timestamps within visible time range
+- [ ] Bucket timestamps into N bins (N ≈ track width / 4px for ~4px per bucket)
+- [ ] Normalize bucket counts to [0, 1] range (max bucket = 1.0)
+- [ ] Render each bucket as a vertical bar on the track, height proportional to normalized density
+- [ ] Update heatmap when: (a) granularity changes, (b) new videos added, (c) visible map region changes (if filtering by geo)
+
+##### State Management
+- [ ] **Owns:** playhead position (timestamp), playing state (bool), granularity level (enum)
+- [ ] **Receives:** time range bounds (min/max timestamp from IndexingService), video timestamp list (for heatmap), geo filter (optional, from map viewport)
+- [ ] **Emits:** `currentTimeChanged(timestamp)` — map listens to show/hide pins; `granularityChanged(level)` — for any UI sync
+
+##### Qt Implementation Notes
+- Recommend custom `QWidget` subclass (not `QSlider`) for full rendering control
+- Use `QPainter` to draw: track background, heatmap bars, playhead, labels
+- Handle `mousePressEvent`, `mouseMoveEvent` for drag/click interactions
+- Expose Qt properties: `currentTime`, `minTime`, `maxTime`, `granularity`, `playing`
+- For QML: wrap as `Q_OBJECT` with `Q_PROPERTY` for reactive binding, or implement as pure QML `Item` with `Canvas` rendering
 
 #### Video Playback & Download
 - [ ] Play videos directly from Logos Storage
@@ -374,12 +424,13 @@ The map screen is the core browsing experience:
   - Video pins displayed as markers at their geolocations
   - Pin density visualization: areas with many videos show clustered indicators
   - Pins color-coded or sized by recency (brighter/larger = more recent)
-- **Timeline Slider** — Horizontal slider at bottom of screen
-  - Granularity selector: **hour, day, week, month, year**
-  - User selects granularity; slider scrubs through the selected time unit
-  - Shows date/time labels at slider position
-  - As slider moves, pins appear/disappear based on timestamp
-  - "Play" button to animate through time automatically
+- **Timeline Component** — Video-scrubber-style horizontal bar at bottom of screen (see [Timeline Component](#timeline-component-video-scrubber) for full spec)
+  - **Data heatmap track** — Density overlay showing where videos exist in time (YouTube "most replayed" style)
+  - **Playhead** — Vertical marker showing current time, draggable to scrub
+  - **Granularity cycle button** — Single button cycles: hour → day → week → month → year
+  - **Click-to-jump** — Click anywhere on track to jump to that time
+  - **Play button** — Auto-advance playhead through time
+  - As playhead moves, pins appear/disappear/fade based on timestamp
 - **Pin Interaction**
   - Hover: show timestamp and thumbnail preview
   - Click: expand to video player overlay
@@ -470,6 +521,13 @@ Manage local video storage:
 - [ ] Tile caching for offline map access in previously viewed areas
 - [x] Smooth timeline scrubbing (no UI freeze)
 
+#### Timeline Component Performance
+- [ ] Heatmap recomputation: <50ms for 10,000 videos (bucket aggregation must be fast)
+- [ ] Playhead drag: 60fps rendering, no dropped frames during scrub
+- [ ] Granularity switch: <100ms to re-render track with new time scale
+- [ ] Play mode: smooth 1-increment-per-second animation (configurable playback speed)
+- [ ] Memory: cache heatmap bucket data; only recompute on granularity change or data change
+
 #### Resource Usage
 - [ ] Video compression before upload (H.265/HEVC where supported)
 - [ ] Background process: minimal CPU/memory footprint when idle
@@ -541,7 +599,7 @@ For initial release:
 
 1. **Upload** — File picker, folder picker, folder monitor, dedup, upload queue
 2. **Geolocation** — EXIF extraction or manual pin placement
-3. **Map View** — Browse pins by location, timeline slider with granularity modes for time filtering
+3. **Map View** — Browse pins by location, timeline component with data heatmap and scrubber UX for time filtering
 4. **Download & Cache** — Download videos, storage management, auto-clean
 5. **Offline Queue** — Capture offline, sync when connected
 
