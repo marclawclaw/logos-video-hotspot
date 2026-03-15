@@ -3,7 +3,11 @@ cmake_minimum_required(VERSION 3.22)
 find_package(Qt6 REQUIRED COMPONENTS Core Test Concurrent Sql)
 
 # ---------------------------------------------------------------------------
-# Unit tests — run without a Logos node (mocked StorageClient / MessagingClient)
+# Unit tests
+# ---------------------------------------------------------------------------
+# SDK detection + LOGOS_CORE_AVAILABLE is propagated via video_hotspot_core
+# PUBLIC interface (wired in root CMakeLists.txt). Tests link video_hotspot_core
+# and get the SDK automatically — no need to repeat SDK linkage here.
 # ---------------------------------------------------------------------------
 
 add_executable(test_deduplicator

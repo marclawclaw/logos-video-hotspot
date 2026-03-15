@@ -3,6 +3,11 @@ build/
 cmake-build-*/
 result/
 
+# SDK build artifacts (vendor/*/build_vendor and vendor/*/install are local)
+vendor/*/build_vendor/
+vendor/*/build/
+vendor/*/install/
+
 # Qt / CMake generated
 *.user
 CMakeCache.txt

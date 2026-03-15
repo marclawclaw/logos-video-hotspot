@@ -7,3 +7,6 @@
 	path = vendor/logos-liblogos
 	url = https://github.com/logos-co/logos-liblogos.git
 	shallow = true
+[submodule "vendor/logos-module"]
+	path = vendor/logos-module
+	url = https://github.com/logos-co/logos-module.git

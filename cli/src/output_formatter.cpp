@@ -222,7 +222,7 @@ void OutputFormatter::statusOutput(bool connected, const StorageStats& stats,
 {
     if (m_human) {
         QTextStream out(stdout);
-        out << "Logos connection: " << (connected ? "connected (mock)" : "disconnected") << "\n"
+        out << "Logos connection: " << (connected ? "connected" : "disconnected") << "\n"
             << "Videos indexed:   " << indexCount << "\n"
             << "Pending messages: " << pendingMessages << "\n"
             << "User-owned bytes: " << stats.userOwnedBytes << "\n"
@@ -232,7 +232,12 @@ void OutputFormatter::statusOutput(bool connected, const StorageStats& stats,
         QJsonObject obj;
         obj["status"]           = "ok";
         obj["connected"]        = connected;
-        obj["mode"]             = "mock";
+#ifdef LOGOS_CORE_AVAILABLE
+        obj["mode"]             = connected ? "sdk" : "offline";
+#else
+        // Built without SDK — local-only mode (development/CI)
+        obj["mode"]             = "local-only";
+#endif
         obj["index_count"]      = indexCount;
         obj["pending_messages"] = pendingMessages;
         obj["user_owned_bytes"] = stats.userOwnedBytes;

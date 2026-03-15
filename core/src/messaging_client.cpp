@@ -1,18 +1,17 @@
 /**
  * MessagingClient — Logos Waku messaging integration.
  *
- * Integration strategy:
- *   When built with LOGOS_CORE_AVAILABLE and initLogos() has been called:
- *     - subscribe() calls Waku via LogosAPI::getClient("waku"):
- *       invokeRemoteMethod("WakuReplica", "subscribeToTopic", kTopic)
- *     - publish() sends real Waku messages:
- *       invokeRemoteMethod("WakuReplica", "publishMessage", {kTopic, payload})
- *     - Incoming messages arrive via onEvent("WakuReplica", "messageReceived")
- *       and are fanned out via the messageReceived() signal.
+ * When built with LOGOS_CORE_AVAILABLE (default when SDK is present):
+ *   - initLogos(LogosAPI*) MUST be called before publish/subscribe.
+ *   - subscribe() calls Waku via LogosAPI::getClient("waku")
+ *   - publish() sends real Waku messages
+ *   - Incoming messages arrive via onEvent("WakuReplica","messageReceived")
+ *   - If m_logosAPI is null (initLogos not called), publish() logs an error
+ *     and persists to pending queue — no silent discard.
  *
- *   When initLogos() has not been called (standalone / no logos-app):
- *     - Falls back to SQLite mock (messages stored locally, looped back)
- *     - Useful for development without a running Logos node
+ * When built WITHOUT LOGOS_CORE_AVAILABLE (SDK absent):
+ *   - Uses SQLite for local message persistence (development / CI only).
+ *   - This path is intentionally disabled when the SDK is present.
  *
  * See ADR-0004.
  */
@@ -77,7 +76,7 @@ static QSqlDatabase openMsgDb()
 
 struct MessagingClientPrivate {
     bool subscribed = false;
-    bool connected  = true;  // always "connected" in mock
+    bool connected  = false;
 };
 
 MessagingClient::MessagingClient(QObject* parent)
@@ -99,7 +98,7 @@ void MessagingClient::initLogos(LogosAPI* logosAPI)
         d->connected = true;
         emit logosConnectionChanged(true);
 
-        // Register incoming message handler
+        // Register incoming message handler from Waku
         auto* client = logosAPI->getClient("waku");
         auto* replica = client->requestObject("WakuReplica");
         if (replica) {
@@ -112,17 +111,19 @@ void MessagingClient::initLogos(LogosAPI* logosAPI)
                                  << payload.size();
                     }
                 });
-            qDebug() << "MessagingClient: subscribed to Waku 'messageReceived' events";
+            qDebug() << "MessagingClient: registered Waku messageReceived handler";
         } else {
             qWarning() << "MessagingClient: WakuReplica not available";
         }
     } else {
-        qDebug() << "MessagingClient: initLogos called with null — using local mock";
+        qWarning() << "MessagingClient: initLogos(nullptr) — Logos not connected;"
+                   << "publish() calls will be queued in pending table";
+        d->connected = false;
         emit logosConnectionChanged(false);
     }
 #else
     Q_UNUSED(logosAPI)
-    qDebug() << "MessagingClient: built without LOGOS_CORE_AVAILABLE — local mock only";
+    qDebug() << "MessagingClient: built without LOGOS_CORE_AVAILABLE — local-only mode";
 #endif
 }
 
@@ -145,10 +146,11 @@ void MessagingClient::subscribe()
             client->invokeRemoteMethod("WakuReplica", "subscribeToTopic",
                                        QVariant(QString(kTopic)));
             qDebug() << "MessagingClient: subscribed to Waku topic" << kTopic;
-            return;
+        } else {
+            qWarning() << "MessagingClient: subscribe() called but Logos not connected;"
+                       << "will subscribe when initLogos() is called";
         }
 #endif
-        // Mock: no-op (subscribe is implicit in mock)
     }
 }
 
@@ -174,7 +176,7 @@ QFuture<bool> MessagingClient::publish(const QByteArray& payload)
 
 #ifdef LOGOS_CORE_AVAILABLE
     if (m_logosAPI) {
-        // ── Real Waku publish via LogosAPI ────────────────────────────────
+        // ── Real Waku publish ─────────────────────────────────────────────
         auto* client = m_logosAPI->getClient("waku");
         QVariant result = client->invokeRemoteMethod(
             "WakuReplica", "publishMessage",
@@ -185,26 +187,39 @@ QFuture<bool> MessagingClient::publish(const QByteArray& payload)
         promise.finish();
 
         if (!ok) {
-            qWarning() << "MessagingClient: Waku publishMessage failed — queueing for retry";
-            // Persist to pending table for retry on reconnect
+            qWarning() << "MessagingClient: Waku publishMessage failed — queuing for retry";
             auto db = QSqlDatabase::database("messaging_db");
             QSqlQuery q(db);
-            q.prepare("INSERT INTO pending (topic, payload, created_at) "
-                      "VALUES (?, ?, ?)");
+            q.prepare("INSERT INTO pending (topic, payload, created_at) VALUES (?, ?, ?)");
             q.addBindValue(QString(kTopic));
             q.addBindValue(payload);
             q.addBindValue(QDateTime::currentSecsSinceEpoch());
             q.exec();
             emit publishFailed(payload, "Waku publishMessage returned false");
         } else {
-            qDebug() << "MessagingClient: Waku publish success, size=" << payload.size();
+            qDebug() << "MessagingClient: Waku publish ok, size=" << payload.size();
         }
         return future;
     }
-#endif
 
-    // ── Local mock: synchronous DB write + signal fan-out ─────────────────
-    // No real network I/O; keep synchronous to avoid races in tests.
+    // m_logosAPI is null — queue message for when connection is established
+    qWarning() << "MessagingClient: publish() called before initLogos() — queuing message";
+    {
+        auto db = QSqlDatabase::database("messaging_db");
+        QSqlQuery q(db);
+        q.prepare("INSERT INTO pending (topic, payload, created_at) VALUES (?, ?, ?)");
+        q.addBindValue(QString(kTopic));
+        q.addBindValue(payload);
+        q.addBindValue(QDateTime::currentSecsSinceEpoch());
+        q.exec();
+    }
+    emit publishFailed(payload, "Logos not connected: message queued for retry");
+    promise.addResult(false);
+    promise.finish();
+    return future;
+
+#else
+    // ── Local-only build (no SDK) ─────────────────────────────────────────
     auto db = QSqlDatabase::database("messaging_db");
     QSqlQuery q(db);
     q.prepare("INSERT INTO messages (topic, payload, created_at, delivered) "
@@ -223,6 +238,7 @@ QFuture<bool> MessagingClient::publish(const QByteArray& payload)
         emit publishFailed(payload, db.lastError().text());
     }
     return future;
+#endif
 }
 
 int MessagingClient::pendingCount() const
@@ -237,32 +253,30 @@ int MessagingClient::pendingCount() const
 void MessagingClient::flushPending()
 {
 #ifdef LOGOS_CORE_AVAILABLE
-    if (m_logosAPI) {
-        auto db = QSqlDatabase::database("messaging_db");
-        QSqlQuery q(db);
-        q.exec("SELECT id, payload FROM pending ORDER BY created_at ASC");
+    if (!m_logosAPI) return;
 
-        while (q.next()) {
-            const int id = q.value(0).toInt();
-            const QByteArray payload = q.value(1).toByteArray();
+    auto db = QSqlDatabase::database("messaging_db");
+    QSqlQuery q(db);
+    q.exec("SELECT id, payload FROM pending ORDER BY created_at ASC");
 
-            auto* client = m_logosAPI->getClient("waku");
-            QVariant result = client->invokeRemoteMethod(
-                "WakuReplica", "publishMessage",
-                QVariant(QString(kTopic)), QVariant(payload));
+    while (q.next()) {
+        const int id = q.value(0).toInt();
+        const QByteArray payload = q.value(1).toByteArray();
 
-            if (result.isValid() && result.toBool()) {
-                QSqlQuery del(db);
-                del.prepare("DELETE FROM pending WHERE id = ?");
-                del.addBindValue(id);
-                del.exec();
-                qDebug() << "MessagingClient: flushed pending message id=" << id;
-            }
+        auto* client = m_logosAPI->getClient("waku");
+        QVariant result = client->invokeRemoteMethod(
+            "WakuReplica", "publishMessage",
+            QVariant(QString(kTopic)), QVariant(payload));
+
+        if (result.isValid() && result.toBool()) {
+            QSqlQuery del(db);
+            del.prepare("DELETE FROM pending WHERE id = ?");
+            del.addBindValue(id);
+            del.exec();
+            qDebug() << "MessagingClient: flushed pending message id=" << id;
         }
-        return;
     }
 #endif
-    // Mock: nothing is truly pending
 }
 
 bool MessagingClient::isConnected() const { return d->connected; }
