@@ -6,6 +6,8 @@
 #include <QString>
 #include <memory>
 
+class LogosAPI;  // forward declaration — real header in logos-cpp-sdk
+
 namespace VideoHotspot {
 
 struct MessagingClientPrivate;
@@ -26,6 +28,26 @@ public:
 
     explicit MessagingClient(QObject* parent = nullptr);
     ~MessagingClient() override;
+
+    /**
+     * Wire this client to the Logos SDK.
+     *
+     * When called with a non-null logosAPI (and built with LOGOS_CORE_AVAILABLE),
+     * publish/subscribe use real Waku via LogosAPI::getClient("waku").
+     * Falls back to SQLite mock otherwise.
+     *
+     * Expected module/object/method names:
+     *   module:     "waku"
+     *   subscribe:  invokeRemoteMethod("WakuReplica", "subscribeToTopic", {topic})
+     *   publish:    invokeRemoteMethod("WakuReplica", "publishMessage",   {topic, payload})
+     *   onMessage:  onEvent(replica, this, "messageReceived", callback)
+     *
+     * @see https://github.com/logos-co/logos-cpp-sdk
+     */
+    void initLogos(LogosAPI* logosAPI);
+
+    /// Returns true when connected to real Logos Waku messaging.
+    bool isLogosConnected() const;
 
     /// Subscribe to the video-hotspot topic. Idempotent.
     void subscribe();
@@ -51,12 +73,14 @@ public:
     bool isConnected() const;
 
 signals:
+    void logosConnectionChanged(bool connected);
     void messageReceived(const QByteArray& payload);
     void connectionStateChanged(bool connected);
     void publishFailed(const QByteArray& payload, const QString& error);
 
 private:
     std::unique_ptr<MessagingClientPrivate> d;
+    LogosAPI* m_logosAPI = nullptr;
 };
 
 }  // namespace VideoHotspot

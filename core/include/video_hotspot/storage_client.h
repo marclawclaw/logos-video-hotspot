@@ -5,6 +5,8 @@
 #include <QString>
 #include <QStringList>
 
+class LogosAPI;  // forward declaration — real header in logos-cpp-sdk
+
 namespace VideoHotspot {
 
 /// Stats about local storage usage.
@@ -45,6 +47,25 @@ class StorageClient : public QObject {
 public:
     explicit StorageClient(QObject* parent = nullptr);
     ~StorageClient() override;
+
+    /**
+     * Wire this client to the Logos SDK.
+     *
+     * When called with a non-null logosAPI (and built with LOGOS_CORE_AVAILABLE),
+     * storage operations use real Codex via LogosAPI::getClient("codex").
+     * When logosAPI is null or LOGOS_CORE_AVAILABLE is not defined, the client
+     * falls back to local filesystem mock storage.
+     *
+     * Expected module/object/method names:
+     *   module:  "codex"
+     *   object:  "CodexReplica"
+     *   store:   invokeRemoteMethod("CodexReplica", "storeFile", {filePath})  → CID
+     *   fetch:   invokeRemoteMethod("CodexReplica", "fetchFile", {cid, destDir}) → localPath
+     *   exists:  invokeRemoteMethod("CodexReplica", "hasCid",   {cid}) → bool
+     *
+     * @see https://github.com/logos-co/logos-cpp-sdk
+     */
+    void initLogos(LogosAPI* logosAPI);
 
     // -------------------------------------------------------------------------
     // Upload
@@ -113,6 +134,9 @@ public:
      */
     void setStorageLimit(qint64 bytes);
 
+    /// Returns true when connected to real Logos Codex storage.
+    bool isLogosConnected() const;
+
 signals:
     void uploadProgress(const QString& filePath, qint64 bytesUploaded, qint64 totalBytes);
     void downloadProgress(const QString& cid, qint64 bytesReceived, qint64 totalBytes);
@@ -121,6 +145,9 @@ signals:
     void downloadComplete(const QString& cid, const QString& localPath);
     void downloadFailed(const QString& cid, const QString& error);
     void storageStatsChanged(const StorageStats& stats);
+
+private:
+    LogosAPI* m_logosAPI = nullptr;
 };
 
 }  // namespace VideoHotspot

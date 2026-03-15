@@ -8,84 +8,119 @@
 
 ---
 
-## Loading in Logos Basecamp
+## Loading in Logos Basecamp (logos-app)
 
-Video Hotspot ships as a Qt plugin (`libvideo_hotspot_plugin.so`) implementing the
-`IComponent` interface (`com.logos.component.IComponent`) from
-[jimmy-claw/scala](https://github.com/jimmy-claw/scala). Basecamp discovers plugins by
-scanning a well-known directory on startup.
+Video Hotspot is a real [`logos-co/logos-app`](https://github.com/logos-co/logos-app)
+plugin implementing the `IComponent` interface (`com.logos.component.IComponent`).
+logos-app loads UI plugins via `QPluginLoader` from its plugins directory.
 
-### 1 — Build the plugin
+### Integration architecture
+
+```
+logos-app
+  └── Window::setupUi()
+        └── QPluginLoader("…/video_hotspot/video_hotspot.so")
+              └── VideoHotspotPlugin::createWidget(logosAPI)
+                    ├── StorageClient::initLogos(logosAPI)
+                    │     └── LogosAPI::getClient("codex") → Codex storage
+                    ├── MessagingClient::initLogos(logosAPI)
+                    │     └── LogosAPI::getClient("waku") → Waku messaging
+                    └── QQuickWidget (VideoHotspotApp.qml)
+                          context: storageClient, messagingClient, logosConnected
+```
+
+### 1 — Clone with submodules (logos-cpp-sdk for real integration)
+
+```bash
+git clone --recurse-submodules https://github.com/marclawclaw/logos-video-hotspot
+# or after cloning:
+git submodule update --init --recursive
+```
+
+The submodules provide `logos-co/logos-cpp-sdk` and `logos-co/logos-liblogos` headers.
+Without them the plugin still builds and runs in **local mock mode** (no real Codex/Waku).
+
+### 2 — Build the plugin
 
 ```bash
 cmake -B build -DBUILD_UI_PLUGIN=ON
-cmake --build build --target video_hotspot_plugin
-# Output: build/ui/plugin/libvideo_hotspot_plugin.so  (Linux)
-#         build/ui/plugin/libvideo_hotspot_plugin.dylib  (macOS)
+cmake --build build --target video_hotspot
+# Output: build/ui/plugin/video_hotspot.so  (Linux)
+#         build/ui/plugin/video_hotspot.dylib  (macOS)
 ```
 
-### 2 — Install into the Basecamp plugin directory
+To build with real Logos SDK integration (requires submodules or manual paths):
 
 ```bash
-PLUGIN_DIR="$HOME/.local/share/Logos/LogosAppNix/plugins/video_hotspot"
-mkdir -p "$PLUGIN_DIR"
-cp build/ui/plugin/libvideo_hotspot_plugin.so "$PLUGIN_DIR/"
-cp ui/plugin/video_hotspot_plugin.json "$PLUGIN_DIR/"
+cmake -B build -DBUILD_UI_PLUGIN=ON \
+  -DLOGOS_CPP_SDK_ROOT=vendor/logos-cpp-sdk \
+  -DLOGOS_LIBLOGOS_ROOT=vendor/logos-liblogos
+cmake --build build --target video_hotspot
+# CMake will print: LOGOS_CORE_AVAILABLE=1 — real Codex+Waku integration enabled
 ```
 
-The JSON manifest (`video_hotspot_plugin.json`) is read by Basecamp to identify the
-plugin type, version, and category before `dlopen`-ing the `.so`.
+### 3 — Install into the logos-app plugin directory
 
-### 3 — Launch Basecamp
+```bash
+# Non-portable build (default logos-app):
+PLUGIN_DIR="$HOME/.local/share/LogosAppNix/plugins/video_hotspot"
+mkdir -p "$PLUGIN_DIR"
+cp build/ui/plugin/video_hotspot.so "$PLUGIN_DIR/"
 
-No extra flags are needed — Basecamp scans the plugins directory on every launch:
+# Portable build (logos-app with LOGOS_PORTABLE_BUILD):
+PLUGIN_DIR="$HOME/.local/share/LogosApp/plugins/video_hotspot"
+mkdir -p "$PLUGIN_DIR"
+cp build/ui/plugin/video_hotspot.so "$PLUGIN_DIR/"
+```
+
+Or use the CMake install target (installs to `~/.local/share/LogosAppNix/plugins/`):
+
+```bash
+cmake --install build --prefix "$HOME/.local"
+```
+
+### 4 — Launch logos-app
 
 ```bash
 logos-app
 ```
 
-> ⚠️ **TBD:** The exact `logos-app` binary name and install location are not yet
-> confirmed for production Basecamp builds. The path above matches the Nix packaging
-> convention observed in `jimmy-claw/scala`. Adjust if your Basecamp binary differs.
+logos-app calls `VideoHotspotPlugin::createWidget(logosAPI)` at startup,
+which wires the `LogosAPI*` to `StorageClient` and `MessagingClient`.
+When both Codex and Waku modules are running, real storage and messaging
+activate automatically — no configuration needed.
 
-If you need to point Basecamp at a non-default plugin directory (e.g. during
-development), try:
-
-```bash
-LOGOS_PLUGIN_PATH="$HOME/.local/share/Logos/LogosAppNix/plugins" logos-app
-```
-
-> ⚠️ **TBD:** `LOGOS_PLUGIN_PATH` is inferred from Basecamp conventions; the exact
-> environment variable name has not been confirmed upstream. Check `logos-app --help`
-> or the jimmy-claw/scala README once a live Basecamp build is available.
-
-### 4 — Verify it loaded
-
-Qt logs plugin resolution to stderr. Look for:
-
-```
-QFactoryLoader: loading plugin "com.logos.component.IComponent" from …/video_hotspot/libvideo_hotspot_plugin.so
-```
-
-One-liner to check at runtime:
+### 5 — Verify it loaded
 
 ```bash
-logos-app 2>&1 | grep -i "video.hotspot\|IComponent"
+logos-app 2>&1 | grep -i "VideoHotspot"
 ```
 
-If the line appears, the plugin was found and instantiated. If nothing appears, confirm
-the `.so` path and that `video_hotspot_plugin.json` is present alongside it.
+Expected output:
+```
+VideoHotspotPlugin: loaded (LOGOS_CORE_AVAILABLE — real Codex+Waku integration)
+VideoHotspotPlugin::createWidget — LogosAPI: connected
+StorageClient: LogosAPI connected — real Codex storage enabled
+MessagingClient: LogosAPI connected — real Waku messaging enabled
+```
 
-### Mock mode (no live Logos node)
+In mock mode (no logos-app / no LogosAPI):
+```
+VideoHotspotPlugin: loaded (local mock — no logos-cpp-sdk at build time)
+VideoHotspotPlugin::createWidget — LogosAPI: null (mock mode)
+```
 
-When Basecamp calls `createWidget(nullptr)` (no `LogosAPI` context), Video Hotspot
+### Local mock mode (development without logos-app)
+
+When logos-app calls `createWidget(nullptr)` (no `LogosAPI` context), Video Hotspot
 falls back to local SQLite storage and filesystem-only uploads — useful for UI
-development without a running Logos node. See `VideoHotspotPlugin.cpp` for the
-`logosAPI == nullptr` branch.
+development without a running Logos node. See `VideoHotspotPlugin.cpp` for details.
 
-> ⚠️ **TBD:** Full `LogosAPI` wiring (passing real `logos::storage::Client` and
-> `logos::messaging::Client` into `StorageClient` / `MessagingClient`) is pending the
-> logos-cpp-sdk integration. ADR-0002 and ADR-0003 describe the intended flow.
+`LogosAPI` wiring is fully implemented: `StorageClient::initLogos()` and
+`MessagingClient::initLogos()` are called in `createWidget()`. Real Codex+Waku calls
+activate when `LOGOS_CORE_AVAILABLE` is defined and logos-app provides a non-null
+`LogosAPI*`. See ADR-0002 and ADR-0003 for the design, and the comments in
+`storage_client.cpp` / `messaging_client.cpp` for the exact method signatures.
 
 ---
 
@@ -110,7 +145,7 @@ development without a running Logos node. See `VideoHotspotPlugin.cpp` for the
 **[▶ demo-module.mp4](demo/demo-module.mp4)** — Video Hotspot shown as a loaded module inside the Logos Basecamp shell
 
 Shows the plugin embedded in a mock Basecamp frame with sidebar navigation,
-network status (Waku/Codex/Nomos), and plugin footer (`libvideo_hotspot_plugin.so`).
+network status (Waku/Codex/Nomos), and plugin footer (`video_hotspot.so`).
 
 Snapshots: [launch](demo/snapshot_01_launch.png) · [map](demo/snapshot_02_map.png) · [timeline](demo/snapshot_03_timeline.png) · [upload](demo/snapshot_04_upload.png) · [plugin loaded](demo/snapshot_05_plugin_loaded.png)
 

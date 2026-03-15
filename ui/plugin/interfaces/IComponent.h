@@ -3,18 +3,24 @@
 /**
  * IComponent — logos-app UI plugin interface.
  *
- * Sourced from jimmy-claw/scala (interfaces/IComponent.h).
+ * Canonical source: logos-co/logos-app (app/interfaces/IComponent.h)
  * IID: "com.logos.component.IComponent"
  *
- * A plugin that implements this interface can be discovered and loaded by
- * logos-app from the plugins directory:
- *   ~/.local/share/Logos/LogosAppNix/plugins/<name>/lib<name>.so
+ * logos-app loads UI plugins via QPluginLoader from the plugins directory:
+ *   Non-portable: ~/.local/share/LogosAppNix/plugins/<name>/<name>.so
+ *   Portable:     ~/.local/share/LogosApp/plugins/<name>/<name>.so
  *
  * logos-app calls:
  *   1. createWidget(logosAPI) — create and return the embedded widget
  *   2. destroyWidget(widget)  — cleanup before unload
  *
- * @see https://github.com/jimmy-claw/scala/blob/main/interfaces/IComponent.h
+ * logosAPI provides:
+ *   - getClient(moduleName)   → LogosAPIClient* (remote method calls)
+ *   - getProvider()           → LogosAPIProvider* (expose methods to others)
+ *   - getTokenManager()       → TokenManager* (auth tokens)
+ *
+ * @see https://github.com/logos-co/logos-app/blob/master/app/interfaces/IComponent.h
+ * @see https://github.com/logos-co/logos-cpp-sdk
  */
 
 #include <QObject>

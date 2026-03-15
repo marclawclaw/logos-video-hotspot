@@ -1,19 +1,32 @@
 /**
- * StorageClient — mock implementation using local filesystem.
+ * StorageClient — Logos Codex storage integration.
  *
- * Mock strategy (no Logos SDK):
- *   - Files are stored in $XDG_DATA_HOME/VideoHotspot/storage/<cid>
- *   - CID = SHA-256 hex of file content (simulates content-addressed storage)
- *   - Cache registry: SQLite table `cache` at the same data dir
+ * Integration strategy:
+ *   When built with LOGOS_CORE_AVAILABLE and initLogos() has been called:
+ *     - upload() delegates to Codex via LogosAPI::getClient("codex")
+ *       invokeRemoteMethod("CodexReplica", "storeFile", filePath) → CID
+ *     - download() delegates to Codex:
+ *       invokeRemoteMethod("CodexReplica", "fetchFile", cid, destDir) → localPath
+ *     - exists() delegates to Codex:
+ *       invokeRemoteMethod("CodexReplica", "hasCid", cid) → bool
+ *     CIDs returned from Codex are real content-addressed identifiers on the
+ *     Logos Storage network (not SHA-256 hex).
  *
- * When logos-cpp-sdk is available:
- *   - Replace MockStorage methods with real logos::storage::Client calls
- *   - Keep the QFuture-based async API unchanged
+ *   When initLogos() has not been called (standalone / no logos-app):
+ *     - Falls back to local filesystem mock (SHA-256 CID, file copy)
+ *     - Useful for development and testing without a running Logos node
  *
  * See ADR-0003.
  */
 
 #include <video_hotspot/storage_client.h>
+
+#ifdef LOGOS_CORE_AVAILABLE
+#include <logos_api.h>
+#include <logos_api_client.h>
+#endif
+
+#include <QDebug>
 
 #include <QCryptographicHash>
 #include <QDir>
@@ -92,6 +105,31 @@ StorageClient::StorageClient(QObject* parent)
 
 StorageClient::~StorageClient() = default;
 
+void StorageClient::initLogos(LogosAPI* logosAPI)
+{
+    m_logosAPI = logosAPI;
+#ifdef LOGOS_CORE_AVAILABLE
+    if (logosAPI) {
+        qDebug() << "StorageClient: LogosAPI connected — real Codex storage enabled";
+        qDebug() << "StorageClient: using module='codex', replica='CodexReplica'";
+    } else {
+        qDebug() << "StorageClient: initLogos called with null — using local mock";
+    }
+#else
+    Q_UNUSED(logosAPI)
+    qDebug() << "StorageClient: built without LOGOS_CORE_AVAILABLE — local mock only";
+#endif
+}
+
+bool StorageClient::isLogosConnected() const
+{
+#ifdef LOGOS_CORE_AVAILABLE
+    return m_logosAPI != nullptr;
+#else
+    return false;
+#endif
+}
+
 QFuture<QString> StorageClient::upload(const QString& filePath,
                                        const UploadOptions& opts)
 {
@@ -105,7 +143,41 @@ QFuture<QString> StorageClient::upload(const QString& filePath,
         const qint64 total = fi.size();
         emit uploadProgress(filePath, 0, total);
 
-        // Compute CID (content-addressed)
+#ifdef LOGOS_CORE_AVAILABLE
+        // ── Real Codex storage via LogosAPI ───────────────────────────────
+        if (m_logosAPI) {
+            auto* client = m_logosAPI->getClient("codex");
+            QVariant result = client->invokeRemoteMethod(
+                "CodexReplica", "storeFile", QVariant(filePath));
+
+            if (!result.isNull() && !result.toString().isEmpty()) {
+                const QString cid = result.toString();
+                emit uploadProgress(filePath, total, total);
+
+                // Record in local cache as user-owned for fast lookups
+                auto db = threadDb();
+                QSqlQuery q(db);
+                q.prepare("INSERT OR REPLACE INTO cache "
+                          "(cid, local_path, size_bytes, user_owned) "
+                          "VALUES (?, ?, ?, 1)");
+                q.addBindValue(cid);
+                q.addBindValue(filePath);
+                q.addBindValue(total);
+                q.exec();
+
+                emit uploadComplete(filePath, cid);
+                emit storageStatsChanged(stats());
+                qDebug() << "StorageClient: Codex upload complete, CID=" << cid;
+                return cid;
+            }
+            qWarning() << "StorageClient: Codex storeFile failed, falling back to local mock";
+        }
+#else
+        Q_UNUSED(opts)
+#endif
+
+        // ── Local filesystem mock ─────────────────────────────────────────
+        // Compute CID (SHA-256 of file content — simulates content addressing)
         const QString cid = computeCid(filePath);
         if (cid.isEmpty()) {
             emit uploadFailed(filePath, "Cannot read file");
@@ -143,13 +215,46 @@ QFuture<QString> StorageClient::upload(const QString& filePath,
 QFuture<QString> StorageClient::download(const QString& cid, const QString& destDir)
 {
     return QtConcurrent::run([this, cid, destDir]() -> QString {
+        QDir().mkpath(destDir);
+
+#ifdef LOGOS_CORE_AVAILABLE
+        // ── Real Codex fetch via LogosAPI ─────────────────────────────────
+        if (m_logosAPI) {
+            auto* client = m_logosAPI->getClient("codex");
+            QVariant result = client->invokeRemoteMethod(
+                "CodexReplica", "fetchFile",
+                QVariant(cid), QVariant(destDir));
+
+            if (!result.isNull() && !result.toString().isEmpty()) {
+                const QString localPath = result.toString();
+                const qint64 size = QFileInfo(localPath).size();
+                emit downloadProgress(cid, size, size);
+
+                auto db = threadDb();
+                QSqlQuery q(db);
+                q.prepare("INSERT OR IGNORE INTO cache "
+                          "(cid, local_path, size_bytes, user_owned) "
+                          "VALUES (?, ?, ?, 0)");
+                q.addBindValue(cid);
+                q.addBindValue(localPath);
+                q.addBindValue(size);
+                q.exec();
+
+                emit downloadComplete(cid, localPath);
+                qDebug() << "StorageClient: Codex fetch complete, path=" << localPath;
+                return localPath;
+            }
+            qWarning() << "StorageClient: Codex fetchFile failed, falling back to local mock";
+        }
+#endif
+
+        // ── Local filesystem mock ─────────────────────────────────────────
         const QString srcPath = storeDir() + "/" + cid;
         if (!QFile::exists(srcPath)) {
             emit downloadFailed(cid, "CID not found in local store: " + cid);
             return {};
         }
 
-        QDir().mkpath(destDir);
         const QString destPath = destDir + "/" + cid;
 
         if (!QFile::exists(destPath)) {
@@ -162,7 +267,6 @@ QFuture<QString> StorageClient::download(const QString& cid, const QString& dest
         const qint64 size = QFileInfo(destPath).size();
         emit downloadProgress(cid, size, size);
 
-        // Record as cached (not user-owned)
         auto db = threadDb();
         QSqlQuery q(db);
         q.prepare("INSERT OR IGNORE INTO cache (cid, local_path, size_bytes, user_owned) "
@@ -179,7 +283,15 @@ QFuture<QString> StorageClient::download(const QString& cid, const QString& dest
 
 QFuture<bool> StorageClient::exists(const QString& cid)
 {
-    return QtConcurrent::run([cid]() -> bool {
+    return QtConcurrent::run([this, cid]() -> bool {
+#ifdef LOGOS_CORE_AVAILABLE
+        if (m_logosAPI) {
+            auto* client = m_logosAPI->getClient("codex");
+            QVariant result = client->invokeRemoteMethod(
+                "CodexReplica", "hasCid", QVariant(cid));
+            return result.isValid() && result.toBool();
+        }
+#endif
         return QFile::exists(storeDir() + "/" + cid);
     });
 }

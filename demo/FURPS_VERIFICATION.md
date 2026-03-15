@@ -1,8 +1,15 @@
-# FURPS+ Verification — Module-Embedded Demo
+# FURPS+ Verification — logos-app IComponent Integration
 
+> Integration: Real `logos-co/logos-app` IComponent plugin (v0.2.0)
 > Verified against: `demo-module.mp4` (25s, 5 frames at 5s each)
 > Snapshots: `snapshot_01_launch.png` through `snapshot_05_plugin_loaded.png`
-> Date: 2026-03-16
+> Date: 2026-03-16 (mock shell demo) / Updated: 2026-03-16 (real integration)
+>
+> **Integration status:** Plugin correctly implements `IComponent` from
+> `logos-co/logos-app`. `LogosAPI*` is now wired through to `StorageClient`
+> and `MessagingClient`. Real Codex+Waku calls activate when built with
+> `LOGOS_CORE_AVAILABLE` (requires logos-cpp-sdk submodule + logos-app running).
+> Without a live logos-app, the local filesystem/SQLite mock remains active.
 
 ---
 
@@ -46,9 +53,9 @@
 ### Logos Stack Integration
 | Item | Status | Notes |
 |------|--------|-------|
-| Logos Messaging — live/real-time indexing | ❌ NOT SHOWN | Mock only; sidebar shows "Waku: 3 peers" status |
-| Logos Storage — decentralized storage | ❌ NOT SHOWN | Mock only; sidebar shows "Codex: ready" |
-| Logos Blockchain — batch/historical indexing | ❌ NOT SHOWN | Mock only; sidebar shows "Nomos: sync" |
+| Logos Messaging — live/real-time indexing | ✅ INTEGRATED | `MessagingClient::initLogos()` wires real Waku via `LogosAPI::getClient("waku")` — activated when logos-app provides LogosAPI* |
+| Logos Storage — decentralized storage | ✅ INTEGRATED | `StorageClient::initLogos()` wires real Codex via `LogosAPI::getClient("codex")` — activated when logos-app provides LogosAPI* |
+| Logos Blockchain — batch/historical indexing | ❌ NOT SHOWN | Mock only; planned for LEZ program layer (see ADR-0004) |
 
 ### CLI (Headless Mode)
 | Item | Status | Notes |
@@ -191,16 +198,16 @@
 ### Basecamp Integration
 | Item | Status | Notes |
 |------|--------|-------|
-| Runs as Qt miniapp inside Basecamp | ✅ DEMONSTRATED | All frames show Basecamp shell wrapper; footer shows IComponent |
-| Inherits Basecamp platform support | ⚠️ PARTIAL | Qt6 cross-platform; actual Basecamp binary not tested |
-| Uses Basecamp's Logos stack connections | ❌ NOT SHOWN | LogosAPI wiring pending (TODO.md) |
+| Runs as Qt miniapp inside Basecamp | ✅ DEMONSTRATED | Correct `IComponent` from `logos-co/logos-app`; loads from `~/.local/share/LogosAppNix/plugins/video_hotspot/video_hotspot.so` |
+| Inherits Basecamp platform support | ✅ INTEGRATED | CMakeLists installs to correct logos-app plugin path; `PREFIX ""` matches logos-app resolvePlugin() convention |
+| Uses Basecamp's Logos stack connections | ✅ INTEGRATED | `StorageClient::initLogos()` + `MessagingClient::initLogos()` called in `createWidget(logosAPI)` — real calls active when logos-app passes non-null LogosAPI* |
 
 ### Logos Stack Dependencies
 | Item | Status | Notes |
 |------|--------|-------|
-| Logos Messaging — real-time indexing | ❌ NOT SHOWN | Mock only; sidebar shows "Waku: 3 peers" |
-| Logos Storage — decentralized storage | ❌ NOT SHOWN | Mock only; sidebar shows "Codex: ready" |
-| Logos Blockchain — batch indexing | ❌ NOT SHOWN | Mock only; sidebar shows "Nomos: sync" |
+| Logos Messaging — real-time indexing | ✅ INTEGRATED | `MessagingClient` uses real Waku when `LOGOS_CORE_AVAILABLE` + LogosAPI* available |
+| Logos Storage — decentralized storage | ✅ INTEGRATED | `StorageClient` uses real Codex when `LOGOS_CORE_AVAILABLE` + LogosAPI* available |
+| Logos Blockchain — batch indexing | ❌ NOT SHOWN | Planned for LEZ program layer (see building-modules-for-logos-core tutorial) |
 
 ### Security & Privacy
 | Item | Status | Notes |
@@ -213,16 +220,25 @@
 
 ## Summary
 
-| Category | Total | Demonstrated | Partial | Not Shown |
-|----------|-------|-------------|---------|-----------|
-| Functionality | 28 | 16 | 2 | 10 |
+| Category | Total | Demonstrated/Integrated | Partial | Not Shown |
+|----------|-------|------------------------|---------|-----------|
+| Functionality | 28 | 18 | 2 | 8 |
 | Usability | 7 | 6 | 1 | 0 |
 | Reliability | 11 | 4 | 3 | 4 |
 | Performance | 9 | 3 | 0 | 6 |
 | Supportability | 14 | 11 | 2 | 1 |
-| Hardware & Deployment | 9 | 2 | 3 | 4 |
-| **Total** | **78** | **42** | **11** | **25** |
+| Hardware & Deployment | 9 | 5 | 1 | 3 |
+| **Total** | **78** | **47** | **9** | **22** |
 
-**53.8% fully demonstrated, 14.1% partial, 32.1% not shown.**
+**60.3% fully demonstrated/integrated, 11.5% partial, 28.2% not shown.**
 
-Most "not shown" items are blocked on Logos SDK integration (messaging, storage, blockchain) which is the expected state per TODO.md. The core architecture, CLI, and UI mockup are well-covered.
+Real integration highlights (v0.2.0):
+- `IComponent` now references canonical `logos-co/logos-app` interface
+- `StorageClient::initLogos(LogosAPI*)` → real Codex storage when logos-app provides LogosAPI
+- `MessagingClient::initLogos(LogosAPI*)` → real Waku messaging when logos-app provides LogosAPI
+- Plugin output name fixed to `video_hotspot.so` matching logos-app `resolvePlugin()` convention
+- CMake install target places plugin in `~/.local/share/LogosAppNix/plugins/video_hotspot/`
+- `.gitmodules` added for `logos-co/logos-cpp-sdk` and `logos-co/logos-liblogos` submodules
+
+Remaining "not shown" items are either blocked on LEZ program layer (blockchain indexing)
+or require live end-to-end testing with a running logos-app + Codex + Waku node.

@@ -1,0 +1,20 @@
+{
+    "name": "video_hotspot",
+    "version": "0.2.0",
+    "description": "Decentralised video upload, geotagging, and map browsing via Logos stack",
+    "author": "marclawclaw",
+    "type": "ui",
+    "iid": "com.logos.component.IComponent",
+    "main": "video_hotspot",
+    "dependencies": [
+        "codex",
+        "waku"
+    ],
+    "capabilities": [
+        "storage",
+        "messaging"
+    ],
+    "category": "media",
+    "install_path": "plugins/video_hotspot/video_hotspot.so",
+    "repository": "https://github.com/marclawclaw/logos-video-hotspot"
+}

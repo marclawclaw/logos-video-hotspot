@@ -13,6 +13,15 @@ option(BUILD_UI_PLUGIN "Build the IComponent UI plugin for logos-app" OFF)
 option(BUILD_UI_APP    "Build the standalone demo app" OFF)
 option(BUILD_TESTS     "Build unit and e2e tests" ON)
 
+# logos-cpp-sdk integration (real Codex + Waku via LogosAPI)
+# Set these to enable real Logos stack connectivity in the UI plugin.
+# Falls back to local mock when not set.
+# Default: vendor/ submodules (run: git submodule update --init --recursive)
+# Override: cmake -DLOGOS_CPP_SDK_ROOT=/path/to/logos-cpp-sdk \
+#                 -DLOGOS_LIBLOGOS_ROOT=/path/to/logos-liblogos ..
+set(LOGOS_CPP_SDK_ROOT "" CACHE PATH "Path to logos-cpp-sdk checkout")
+set(LOGOS_LIBLOGOS_ROOT "" CACHE PATH "Path to logos-liblogos checkout")
+
 # ---------------------------------------------------------------------------
 # Dependencies
 # ---------------------------------------------------------------------------
