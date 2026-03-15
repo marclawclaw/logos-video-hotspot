@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# gen-voice-edge.sh — Generate narration using Microsoft Edge TTS (natural-sounding)
+# Voice: en-US-AndrewNeural (warm, approachable, conversational)
+# Requires: edge-tts, ffmpeg
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VOICE_DIR="$SCRIPT_DIR/voice"
+mkdir -p "$VOICE_DIR"
+
+VOICE="en-US-AndrewNeural"
+RATE="-5%"   # slightly slower than default for clarity
+PITCH="-2Hz" # slightly deeper, more natural
+
+echo "=== Generating voice clips with edge-tts ($VOICE) ==="
+
+# Each entry: name|text
+declare -a LINES=(
+    "line-01|Welcome to Video Hotspot — a decentralised video sharing app built on the Logos stack."
+    "line-02|The Map tab shows geotagged video pins published to the Logos network."
+    "line-03|Each coloured pin marks a video with GPS coordinates — five clips visible here."
+    "line-04|Use the timeline slider to filter videos by time period."
+    "line-05|Dragging left narrows the window — older pins fade out."
+    "line-06|Dragging right brings all pins back into view."
+    "line-07|Pins respond with a smooth opacity transition as the time window changes."
+    "line-08|Now let's switch to the Upload tab to see the decentralised upload flow."
+    "line-09|Click Upload File to queue a video for publishing to the Logos network."
+    "line-10|Each file gets a progress bar as it's chunked and distributed across nodes."
+    "line-11|Let's add a second file."
+    "line-12|And a third — the queue fills up with live progress tracking."
+    "line-13|Click Upload Folder to batch-add an entire directory in one go."
+    "line-14|Three folder clips are added simultaneously — the queue grows automatically."
+    "line-15|Now watch what happens when we try to upload a file that's already in the queue."
+    "line-16|The deduplication engine detects the match and flags it with a DUPLICATE badge — no wasted bandwidth."
+    "line-17|Switching to the Downloads tab shows your local cache and owned videos."
+    "line-18|Storage usage is tracked against your configured limit — here twelve percent used."
+    "line-19|The Settings tab lets you tune storage limits, watched folders, and node connectivity."
+    "line-20|Auto-monitoring is enabled — new files dropped into the watched folder are queued instantly."
+    "line-21|The Logos node shows connected status — in production this links to a real network peer."
+    "line-22|Back on the Map — Video Hotspot gives communities a censorship-resistant way to share video evidence."
+    "line-23|Built on Waku for messaging, Codex for storage, and Nomos for consensus — fully on the Logos stack."
+    "line-24|Thank you for watching."
+)
+
+for entry in "${LINES[@]}"; do
+    name="${entry%%|*}"
+    text="${entry#*|}"
+    outfile_mp3="$VOICE_DIR/${name}.mp3"
+    outfile_wav="$VOICE_DIR/${name}.wav"
+    echo "  $name: $text"
+    edge-tts \
+        --voice "$VOICE" \
+        --rate "$RATE" \
+        --pitch "$PITCH" \
+        --text "$text" \
+        --write-media "$outfile_mp3"
+    # Convert mp3 → wav (22050 Hz mono)
+    ffmpeg -y -i "$outfile_mp3" -ar 22050 -ac 1 "$outfile_wav" -loglevel error
+done
+
+echo ""
+echo "=== Building concat list with silence gaps ==="
+
+SILENCE_WAV="$VOICE_DIR/silence-half.wav"
+ffmpeg -y -f lavfi -i anullsrc=r=22050:cl=mono -t 0.5 "$SILENCE_WAV" -loglevel error
+
+SILENCE_LONG="$VOICE_DIR/silence-long.wav"
+ffmpeg -y -f lavfi -i anullsrc=r=22050:cl=mono -t 0.8 "$SILENCE_LONG" -loglevel error
+
+CONCAT_LIST="$VOICE_DIR/concat.txt"
+> "$CONCAT_LIST"
+
+declare -a GAPS=(
+    "0.0"  # before line-01
+    "0.5"  # after line-01
+    "0.5"  # after line-02
+    "0.5"  # after line-03
+    "0.5"  # after line-04
+    "0.5"  # after line-05
+    "0.5"  # after line-06
+    "0.8"  # after line-07
+    "0.5"  # after line-08
+    "0.8"  # after line-09
+    "0.5"  # after line-10
+    "0.5"  # after line-11
+    "0.8"  # after line-12
+    "0.8"  # after line-13
+    "0.8"  # after line-14
+    "0.5"  # after line-15
+    "0.8"  # after line-16
+    "0.5"  # after line-17
+    "0.8"  # after line-18
+    "0.5"  # after line-19
+    "0.5"  # after line-20
+    "0.8"  # after line-21
+    "0.5"  # after line-22
+    "0.5"  # after line-23
+)
+
+for i in "${!LINES[@]}"; do
+    num=$((i + 1))
+    name=$(printf "line-%02d" $num)
+    echo "file '${name}.wav'" >> "$CONCAT_LIST"
+    gap="${GAPS[$i]:-0.5}"
+    if (( $(echo "$gap > 0.7" | bc -l) )); then
+        echo "file 'silence-long.wav'" >> "$CONCAT_LIST"
+    elif (( $(echo "$gap > 0.0" | bc -l) )); then
+        echo "file 'silence-half.wav'" >> "$CONCAT_LIST"
+    fi
+done
+
+echo "=== Merging clips → narration.wav ==="
+cd "$VOICE_DIR"
+ffmpeg -y -f concat -safe 0 -i concat.txt \
+    -ar 44100 -ac 1 -acodec pcm_s16le \
+    narration.wav -loglevel error
+
+echo ""
+echo "=== Narration generated ==="
+ls -lh "$VOICE_DIR/narration.wav"
+duration=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 "$VOICE_DIR/narration.wav" 2>/dev/null)
+echo "Duration: ${duration}s"
