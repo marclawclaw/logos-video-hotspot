@@ -104,11 +104,19 @@ All six core module **headers** fully designed + **mock implementations** writte
 - [ ] **Map Screen**: Core browsing UI
   - Embed map tile renderer (MapLibre GL / QtLocation)
   - Video pin markers at geolocations
-  - Timeline slider with granularity selector (hour/day/week/month/year)
-  - Animate through time (Play button)
   - Click pin → video player overlay
   - Download button on expanded pin
   - Search bar to center map on location
+- [ ] **Timeline Component** (new): Video-scrubber-style timeline replacing basic slider
+  - Custom QWidget subclass with QPainter rendering (not QSlider)
+  - Data heatmap overlay: bucket video timestamps, render density bars on track
+  - Playhead with draggable handle + timestamp display
+  - Click-to-jump anywhere on track
+  - Granularity cycle button (hour→day→week→month→year)
+  - Play/Pause button for auto-advance
+  - Keyboard shortcuts (arrows, space)
+  - Emit `currentTimeChanged()` and `granularityChanged()` signals
+  - See README.md "Timeline Component (Video Scrubber)" for full spec
 - [ ] **Downloads/Cache Screen**
   - Space usage bar (user-owned vs cached)
   - Two-section list: Your Videos / Cached Videos
