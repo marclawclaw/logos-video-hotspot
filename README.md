@@ -81,6 +81,15 @@ cmake --install build --prefix "$HOME/.local"
 
 ### 4 — Launch logos-app
 
+> **Building logos-app:** See [logos-co/logos-app](https://github.com/logos-co/logos-app) for build instructions.
+>
+> **Standalone development:** You can also use the standalone demo app (`video-hotspot-app`) built with `BUILD_UI_APP=ON` for development without needing logos-app:
+> ```bash
+> cmake -B build -DBUILD_UI_APP=ON -DBUILD_UI_PLUGIN=ON
+> cmake --build build --target video-hotspot-app
+> ./build/ui/app/video-hotspot-app
+> ```
+
 ```bash
 logos-app
 ```
@@ -158,6 +167,9 @@ See [`demo/FURPS_VERIFICATION.md`](demo/FURPS_VERIFICATION.md) for full FURPS+ s
 ### Prerequisites
 
 - Qt 6 (Core, Concurrent, Network, Sql)
+- Qt6 RemoteObjects — only needed when building with `BUILD_UI_PLUGIN=ON`
+  - Fedora: `qt6-qtremoteobjects-devel`
+  - Debian/Ubuntu: `libqt6remoteobjects6-dev`
 - CMake ≥ 3.22, C++17 compiler
 
 ### Build

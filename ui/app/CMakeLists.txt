@@ -9,7 +9,7 @@ add_executable(video-hotspot-app
 
 target_link_libraries(video-hotspot-app
     PRIVATE
-        video_hotspot_plugin
+        video_hotspot
         Qt6::Core
         Qt6::Quick
         Qt6::Widgets

@@ -1,5 +1,6 @@
 {
     "name": "video_hotspot",
+    "manifestVersion": "0.1.0",
     "version": "0.2.0",
     "description": "Decentralised video upload, geotagging, and map browsing via Logos stack",
     "author": "marclawclaw",

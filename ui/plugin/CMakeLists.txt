@@ -5,43 +5,10 @@ find_package(Qt6 REQUIRED COMPONENTS Core Quick Widgets QuickWidgets)
 # ---------------------------------------------------------------------------
 # Optional: logos-cpp-sdk integration (real Codex + Waku via LogosAPI)
 # ---------------------------------------------------------------------------
-# Set LOGOS_CPP_SDK_ROOT and LOGOS_LIBLOGOS_ROOT to enable real integration.
-# When not set, the plugin falls back to local filesystem/SQLite mocks.
-#
-# Example:
-#   cmake -DLOGOS_CPP_SDK_ROOT=~/src/logos-cpp-sdk \
-#         -DLOGOS_LIBLOGOS_ROOT=~/src/logos-liblogos \
-#         ..
-#
-# Or use git submodules (after `git submodule update --init --recursive`):
-#   LOGOS_CPP_SDK_ROOT defaults to vendor/logos-cpp-sdk (repo root)
-#   LOGOS_LIBLOGOS_ROOT defaults to vendor/logos-liblogos (repo root)
+# SDK detection is handled by the root CMakeLists.txt, which sets
+# LOGOS_CORE_AVAILABLE and propagates SDK headers/libs through
+# video_hotspot_core's PUBLIC interface. Do NOT re-detect here.
 # ---------------------------------------------------------------------------
-
-set(_repo_root "${CMAKE_SOURCE_DIR}")
-
-if(NOT DEFINED LOGOS_CPP_SDK_ROOT)
-    set(LOGOS_CPP_SDK_ROOT "${_repo_root}/vendor/logos-cpp-sdk")
-endif()
-if(NOT DEFINED LOGOS_LIBLOGOS_ROOT)
-    set(LOGOS_LIBLOGOS_ROOT "${_repo_root}/vendor/logos-liblogos")
-endif()
-
-set(_logos_sdk_header "${LOGOS_CPP_SDK_ROOT}/cpp/logos_api.h")
-# logos-liblogos exposes logos_core.h at src/logos_core/logos_core.h (not root interface.h)
-set(_logos_lib_header "${LOGOS_LIBLOGOS_ROOT}/src/logos_core/logos_core.h")
-
-if(EXISTS "${_logos_sdk_header}" AND EXISTS "${_logos_lib_header}")
-    set(LOGOS_CORE_AVAILABLE TRUE)
-    message(STATUS "VideoHotspotPlugin: logos-cpp-sdk found at ${LOGOS_CPP_SDK_ROOT}")
-    message(STATUS "VideoHotspotPlugin: logos-liblogos found at ${LOGOS_LIBLOGOS_ROOT}")
-    message(STATUS "VideoHotspotPlugin: LOGOS_CORE_AVAILABLE=1 — real Codex+Waku integration enabled")
-else()
-    set(LOGOS_CORE_AVAILABLE FALSE)
-    message(STATUS "VideoHotspotPlugin: logos-cpp-sdk not found — using local mock")
-    message(STATUS "  Run: git submodule update --init --recursive")
-    message(STATUS "  Or set: -DLOGOS_CPP_SDK_ROOT=<path> -DLOGOS_LIBLOGOS_ROOT=<path>")
-endif()
 
 # ---------------------------------------------------------------------------
 # Plugin target
@@ -52,6 +19,8 @@ add_library(video_hotspot SHARED
     VideoHotspotPlugin.h
     resources.qrc
 )
+
+set(CMAKE_AUTORCC ON)
 
 target_include_directories(video_hotspot PRIVATE .)
 
@@ -85,6 +54,7 @@ if(LOGOS_CORE_AVAILABLE)
         ${LOGOS_CPP_SDK_ROOT}/cpp/logos_api_client.cpp
         ${LOGOS_CPP_SDK_ROOT}/cpp/logos_api_consumer.cpp
         ${LOGOS_CPP_SDK_ROOT}/cpp/logos_api_provider.cpp
+        ${LOGOS_CPP_SDK_ROOT}/cpp/logos_types.cpp
         ${LOGOS_CPP_SDK_ROOT}/cpp/token_manager.cpp
         ${LOGOS_CPP_SDK_ROOT}/cpp/module_proxy.cpp
     )
@@ -98,15 +68,6 @@ if(LOGOS_CORE_AVAILABLE)
     target_link_libraries(video_hotspot PRIVATE Qt6::RemoteObjects)
 
     target_compile_definitions(video_hotspot PRIVATE LOGOS_CORE_AVAILABLE=1)
-
-    # Also propagate to core library so StorageClient/MessagingClient compile
-    # the real integration branches
-    target_compile_definitions(video_hotspot_core PUBLIC LOGOS_CORE_AVAILABLE=1)
-    target_include_directories(video_hotspot_core PUBLIC
-        ${LOGOS_CPP_SDK_ROOT}/cpp
-        ${LOGOS_LIBLOGOS_ROOT}/src/logos_core
-        ${LOGOS_LIBLOGOS_ROOT}/src/common
-    )
 endif()
 
 # ---------------------------------------------------------------------------

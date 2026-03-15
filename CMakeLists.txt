@@ -47,6 +47,8 @@ find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Network Sql)
 # ---------------------------------------------------------------------------
 # Core library (shared between CLI and Qt plugin)
 # ---------------------------------------------------------------------------
+# video_hotspot_core doubles as the headless backend, usable both from CLI
+# (mock mode) and from the UI plugin (SDK mode when available).
 add_library(video_hotspot_core STATIC
     core/src/storage_client.cpp
     core/src/deduplicator.cpp
@@ -66,6 +68,8 @@ target_include_directories(video_hotspot_core
     PUBLIC  core/include
     PRIVATE core/src
 )
+
+set_target_properties(video_hotspot_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(video_hotspot_core
     PUBLIC
