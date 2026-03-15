@@ -18,6 +18,28 @@ set(LOGOS_LIBLOGOS_ROOT "" CACHE PATH "Path to logos-liblogos checkout")
 set(LOGOS_MODULE_ROOT   "" CACHE PATH "Path to logos-module checkout")
 
 # ---------------------------------------------------------------------------
+# Logos-native module dependency declaration
+# ---------------------------------------------------------------------------
+# Runtime dependencies on the Logos daemon modules (Codex, Waku) are declared
+# in the Qt plugin metadata embedded in the plugin binary — NOT via OS package
+# managers (Debian/RPM) or any external manifest file.
+#
+# Declaration location: ui/plugin/video_hotspot.json
+#   "dependencies": ["codex", "waku"]
+#
+# How it works:
+#   1. Q_PLUGIN_METADATA(IID ... FILE "video_hotspot.json") embeds the JSON
+#      into the compiled .so at build time.
+#   2. logos-app (or any Logos host) uses logos-module's ModuleMetadata::fromJson()
+#      to read the "dependencies" array before loading the plugin.
+#   3. The host ensures "codex" and "waku" modules are active in the Logos
+#      daemon before activating this component.
+#
+# This is the standard Logos module dependency mechanism per the logos-module
+# library (vendor/logos-module/src/module_metadata.h).
+# ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
 # Dependencies
 # ---------------------------------------------------------------------------
 find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Network Sql)
