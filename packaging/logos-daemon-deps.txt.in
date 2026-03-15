@@ -1,7 +1,0 @@
-# Logos daemon runtime dependencies
-# These modules must be active in the Logos daemon for video-hotspot to function
-CODEX_MODULE=codex
-CODEX_REPLICA=CodexReplica
-WAKU_MODULE=waku
-WAKU_REPLICA=WakuReplica
-DAEMON_AUTOSTART=true
