@@ -28,7 +28,8 @@ if(NOT DEFINED LOGOS_LIBLOGOS_ROOT)
 endif()
 
 set(_logos_sdk_header "${LOGOS_CPP_SDK_ROOT}/cpp/logos_api.h")
-set(_logos_lib_header "${LOGOS_LIBLOGOS_ROOT}/interface.h")
+# logos-liblogos exposes logos_core.h at src/logos_core/logos_core.h (not root interface.h)
+set(_logos_lib_header "${LOGOS_LIBLOGOS_ROOT}/src/logos_core/logos_core.h")
 
 if(EXISTS "${_logos_sdk_header}" AND EXISTS "${_logos_lib_header}")
     set(LOGOS_CORE_AVAILABLE TRUE)
@@ -90,7 +91,8 @@ if(LOGOS_CORE_AVAILABLE)
 
     target_include_directories(video_hotspot PRIVATE
         ${LOGOS_CPP_SDK_ROOT}/cpp
-        ${LOGOS_LIBLOGOS_ROOT}
+        ${LOGOS_LIBLOGOS_ROOT}/src/logos_core
+        ${LOGOS_LIBLOGOS_ROOT}/src/common
     )
 
     target_link_libraries(video_hotspot PRIVATE Qt6::RemoteObjects)
@@ -102,7 +104,8 @@ if(LOGOS_CORE_AVAILABLE)
     target_compile_definitions(video_hotspot_core PUBLIC LOGOS_CORE_AVAILABLE=1)
     target_include_directories(video_hotspot_core PUBLIC
         ${LOGOS_CPP_SDK_ROOT}/cpp
-        ${LOGOS_LIBLOGOS_ROOT}
+        ${LOGOS_LIBLOGOS_ROOT}/src/logos_core
+        ${LOGOS_LIBLOGOS_ROOT}/src/common
     )
 endif()
 

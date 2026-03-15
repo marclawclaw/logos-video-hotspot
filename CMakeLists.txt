@@ -13,27 +13,14 @@ option(BUILD_UI_PLUGIN "Build the IComponent UI plugin for logos-app" OFF)
 option(BUILD_UI_APP    "Build the standalone demo app" OFF)
 option(BUILD_TESTS     "Build unit and e2e tests" ON)
 
-# logos-cpp-sdk integration (real Codex + Waku via LogosAPI)
-# Set these to enable real Logos stack connectivity in the UI plugin.
-# Falls back to local mock when not set.
-# Default: vendor/ submodules (run: git submodule update --init --recursive)
-# Override: cmake -DLOGOS_CPP_SDK_ROOT=/path/to/logos-cpp-sdk \
-#                 -DLOGOS_LIBLOGOS_ROOT=/path/to/logos-liblogos ..
-set(LOGOS_CPP_SDK_ROOT "" CACHE PATH "Path to logos-cpp-sdk checkout")
+set(LOGOS_CPP_SDK_ROOT  "" CACHE PATH "Path to logos-cpp-sdk checkout")
 set(LOGOS_LIBLOGOS_ROOT "" CACHE PATH "Path to logos-liblogos checkout")
+set(LOGOS_MODULE_ROOT   "" CACHE PATH "Path to logos-module checkout")
 
 # ---------------------------------------------------------------------------
 # Dependencies
 # ---------------------------------------------------------------------------
 find_package(Qt6 REQUIRED COMPONENTS Core Concurrent Network Sql)
-
-# NOTE: Real production build uses BLAKE3 for content hashing.
-# This mock build uses Qt6's QCryptographicHash (SHA-256) to avoid a
-# FetchContent build step. BLAKE3 is documented in ADR-0005.
-# To enable real BLAKE3:
-#   - Add BLAKE3 FetchContent or find_package
-#   - Define REAL_BLAKE3 and link blake3 library
-#   - Swap hash implementation in deduplicator.cpp
 
 # ---------------------------------------------------------------------------
 # Core library (shared between CLI and Qt plugin)
@@ -45,7 +32,6 @@ add_library(video_hotspot_core STATIC
     core/src/indexing_service.cpp
     core/src/metadata_extractor.cpp
     core/src/messaging_client.cpp
-    # Include headers as sources so AUTOMOC picks up Q_OBJECT declarations
     core/include/video_hotspot/storage_client.h
     core/include/video_hotspot/deduplicator.h
     core/include/video_hotspot/upload_queue.h
@@ -66,6 +52,104 @@ target_link_libraries(video_hotspot_core
         Qt6::Network
         Qt6::Sql
 )
+
+# ---------------------------------------------------------------------------
+# Logos SDK detection — after video_hotspot_core so we can target_link it
+# ---------------------------------------------------------------------------
+# Requires pre-built SDK libs. Build with:
+#   bash scripts/build-sdk.sh
+#
+# Or manually:
+#   cd vendor/logos-module
+#   cmake -B build -DCMAKE_INSTALL_PREFIX=$(pwd)/install && cmake --build build && cmake --install build
+#
+#   cd vendor/logos-liblogos
+#   cmake -B build_vendor -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+#     -DLOGOS_CPP_SDK_ROOT=../logos-cpp-sdk \
+#     -DLOGOS_MODULE_ROOT=../logos-module/install \
+#     -DCMAKE_INSTALL_PREFIX=$(pwd)/install
+#   cmake --build build_vendor --target logos_core logos_sdk
+#   cp build_vendor/lib/liblogos_core.so build_vendor/lib/liblogos_sdk.a install/lib/
+# ---------------------------------------------------------------------------
+
+if(LOGOS_CPP_SDK_ROOT STREQUAL "")
+    set(_sdk_root "${CMAKE_SOURCE_DIR}/vendor/logos-cpp-sdk")
+else()
+    set(_sdk_root "${LOGOS_CPP_SDK_ROOT}")
+endif()
+if(LOGOS_LIBLOGOS_ROOT STREQUAL "")
+    set(_lib_root "${CMAKE_SOURCE_DIR}/vendor/logos-liblogos")
+else()
+    set(_lib_root "${LOGOS_LIBLOGOS_ROOT}")
+endif()
+if(LOGOS_MODULE_ROOT STREQUAL "")
+    set(_mod_root "${CMAKE_SOURCE_DIR}/vendor/logos-module")
+else()
+    set(_mod_root "${LOGOS_MODULE_ROOT}")
+endif()
+
+set(_logos_sdk_header "${_sdk_root}/cpp/logos_api.h")
+set(_logos_lib_header "${_lib_root}/src/logos_core/logos_core.h")
+set(_logos_core_lib   "${_lib_root}/install/lib/liblogos_core.so")
+set(_logos_sdk_lib    "${_lib_root}/install/lib/liblogos_sdk.a")
+set(_logos_module_lib "${_mod_root}/install/lib/liblogos_module.a")
+
+if(EXISTS "${_logos_sdk_header}" AND EXISTS "${_logos_lib_header}"
+   AND EXISTS "${_logos_core_lib}" AND EXISTS "${_logos_sdk_lib}")
+    set(LOGOS_CORE_AVAILABLE TRUE)
+    message(STATUS "Logos SDK: LOGOS_CORE_AVAILABLE=1 — real SDK integration enabled")
+    message(STATUS "  logos-cpp-sdk:  ${_sdk_root}")
+    message(STATUS "  logos-liblogos: ${_lib_root}")
+
+    find_package(Qt6 QUIET COMPONENTS RemoteObjects)
+
+    # GLOBAL imported targets — visible in all subdirectories
+    add_library(logos_core_lib SHARED IMPORTED GLOBAL)
+    set_target_properties(logos_core_lib PROPERTIES
+        IMPORTED_LOCATION "${_logos_core_lib}"
+        INTERFACE_INCLUDE_DIRECTORIES "${_lib_root}/install/include;${_lib_root}/src/logos_core;${_lib_root}/src/common"
+    )
+
+    add_library(logos_sdk_lib STATIC IMPORTED GLOBAL)
+    set_target_properties(logos_sdk_lib PROPERTIES
+        IMPORTED_LOCATION "${_logos_sdk_lib}"
+        INTERFACE_INCLUDE_DIRECTORIES "${_sdk_root}/cpp"
+    )
+
+    if(EXISTS "${_logos_module_lib}")
+        add_library(logos_module_lib STATIC IMPORTED GLOBAL)
+        set_target_properties(logos_module_lib PROPERTIES
+            IMPORTED_LOCATION "${_logos_module_lib}"
+            INTERFACE_INCLUDE_DIRECTORIES "${_mod_root}/install/include"
+        )
+    endif()
+
+    # Propagate everything through video_hotspot_core PUBLIC interface
+    # so CLI, UI plugin, and tests all get SDK automatically
+    target_compile_definitions(video_hotspot_core PUBLIC LOGOS_CORE_AVAILABLE=1)
+    target_include_directories(video_hotspot_core PUBLIC
+        ${_sdk_root}/cpp
+        ${_lib_root}/install/include
+        ${_lib_root}/src/logos_core
+        ${_lib_root}/src/common
+    )
+    target_link_libraries(video_hotspot_core PUBLIC
+        logos_core_lib
+        logos_sdk_lib
+    )
+    if(TARGET logos_module_lib)
+        target_link_libraries(video_hotspot_core PUBLIC logos_module_lib)
+    endif()
+    if(Qt6RemoteObjects_FOUND)
+        target_link_libraries(video_hotspot_core PUBLIC Qt6::RemoteObjects)
+    endif()
+else()
+    set(LOGOS_CORE_AVAILABLE FALSE)
+    message(STATUS "Logos SDK: NOT found — SDK unavailable")
+    message(STATUS "  Expected core lib: ${_logos_core_lib}")
+    message(STATUS "  Expected SDK lib:  ${_logos_sdk_lib}")
+    message(STATUS "  Run: git submodule update --init --recursive && bash scripts/build-sdk.sh")
+endif()
 
 # ---------------------------------------------------------------------------
 # CLI frontend (headless — no Qt6::Widgets / Qt6::Quick)

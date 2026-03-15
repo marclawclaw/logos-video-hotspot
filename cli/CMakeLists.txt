@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.22)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Concurrent)
 
+# ---------------------------------------------------------------------------
+# CLI target
+# ---------------------------------------------------------------------------
+# SDK detection + LOGOS_CORE_AVAILABLE propagation is handled in the root
+# CMakeLists.txt which wires everything into video_hotspot_core PUBLIC.
+# The CLI just links video_hotspot_core and gets the SDK automatically.
+# ---------------------------------------------------------------------------
+
 add_executable(video-hotspot-cli
     src/main.cpp
     src/output_formatter.cpp
