@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800">
+<rect x="0" y="0" width="1280" height="800" fill="#0d1117" rx="0" stroke="none"/>
+<rect x="0" y="0" width="1280" height="36" fill="#0d1117" rx="0" stroke="none"/>
+<circle cx="16" cy="18" r="6" fill="#ff5f57"/>
+<circle cx="34" cy="18" r="6" fill="#febc2e"/>
+<circle cx="52" cy="18" r="6" fill="#28c840"/>
+<text x="640" y="23" fill="#8b949e" font-size="13" text-anchor="middle" font-weight="bold" font-family="sans-serif">Logos Basecamp</text>
+<line x1="0" y1="36" x2="1280" y2="36" stroke="#30363d" stroke-width="1"/>
+<rect x="0" y="36" width="200" height="736" fill="#161b22" rx="0" stroke="none"/>
+<text x="16" y="64" fill="#8b949e" font-size="10" text-anchor="start" font-weight="bold" font-family="monospace">MODULES</text>
+<rect x="4" y="76" width="192" height="28" fill="#3b82f6" rx="4" stroke="none" opacity="0.2"/>
+<rect x="0" y="76" width="3" height="28" fill="#3b82f6" rx="1" stroke="none"/>
+<circle cx="24" cy="90" r="4" fill="#4caf50"/>
+<text x="36" y="94" fill="#f0f0f0" font-size="12" text-anchor="start" font-weight="bold" font-family="sans-serif">Video Hotspot</text>
+<circle cx="24" cy="122" r="4" fill="#30363d"/>
+<text x="36" y="126" fill="#8b949e" font-size="12" text-anchor="start" font-weight="normal" font-family="sans-serif">Chat</text>
+<circle cx="24" cy="154" r="4" fill="#30363d"/>
+<text x="36" y="158" fill="#8b949e" font-size="12" text-anchor="start" font-weight="normal" font-family="sans-serif">Wallet</text>
+<circle cx="24" cy="186" r="4" fill="#30363d"/>
+<text x="36" y="190" fill="#8b949e" font-size="12" text-anchor="start" font-weight="normal" font-family="sans-serif">Browser</text>
+<circle cx="24" cy="218" r="4" fill="#30363d"/>
+<text x="36" y="222" fill="#8b949e" font-size="12" text-anchor="start" font-weight="normal" font-family="sans-serif">Settings</text>
+<line x1="16" y1="248" x2="184" y2="248" stroke="#30363d" stroke-width="1"/>
+<text x="16" y="276" fill="#8b949e" font-size="10" text-anchor="start" font-weight="bold" font-family="monospace">NETWORK</text>
+<circle cx="24" cy="296" r="4" fill="#4caf50"/>
+<text x="36" y="300" fill="#8b949e" font-size="11" text-anchor="start" font-weight="normal" font-family="sans-serif">Waku: 3 peers</text>
+<circle cx="24" cy="318" r="4" fill="#4caf50"/>
+<text x="36" y="322" fill="#8b949e" font-size="11" text-anchor="start" font-weight="normal" font-family="sans-serif">Codex: ready</text>
+<circle cx="24" cy="340" r="4" fill="#ff9800"/>
+<text x="36" y="344" fill="#8b949e" font-size="11" text-anchor="start" font-weight="normal" font-family="sans-serif">Nomos: sync</text>
+<line x1="200" y1="36" x2="200" y2="772" stroke="#30363d" stroke-width="1"/>
+<rect x="200" y="36" width="1080" height="36" fill="#161b22" rx="0" stroke="none"/>
+<rect x="200" y="36" width="270" height="36" fill="#21262d" rx="0" stroke="none"/>
+<rect x="200" y="69" width="270" height="3" fill="#3b82f6" rx="0" stroke="none"/>
+<line x1="200" y1="36" x2="200" y2="72" stroke="#30363d" stroke-width="1"/>
+<text x="335" y="59" fill="#f0f0f0" font-size="12" text-anchor="middle" font-weight="bold" font-family="sans-serif">Map</text>
+<line x1="470" y1="36" x2="470" y2="72" stroke="#30363d" stroke-width="1"/>
+<text x="605" y="59" fill="#8b949e" font-size="12" text-anchor="middle" font-weight="normal" font-family="sans-serif">Upload</text>
+<line x1="740" y1="36" x2="740" y2="72" stroke="#30363d" stroke-width="1"/>
+<text x="875" y="59" fill="#8b949e" font-size="12" text-anchor="middle" font-weight="normal" font-family="sans-serif">Downloads</text>
+<line x1="1010" y1="36" x2="1010" y2="72" stroke="#30363d" stroke-width="1"/>
+<text x="1145" y="59" fill="#8b949e" font-size="12" text-anchor="middle" font-weight="normal" font-family="sans-serif">Settings</text>
+<line x1="200" y1="72" x2="1280" y2="72" stroke="#30363d" stroke-width="1"/>
+<rect x="200" y="72" width="1080" height="650" fill="#1c2b1c" rx="0" stroke="none"/>
+<path d="M200,72 L200,722 M280,72 L280,722 M360,72 L360,722 M440,72 L440,722 M520,72 L520,722 M600,72 L600,722 M680,72 L680,722 M760,72 L760,722 M840,72 L840,722 M920,72 L920,722 M1000,72 L1000,722 M1080,72 L1080,722 M1160,72 L1160,722 M1240,72 L1240,722 M200,72 L1280,72 M200,152 L1280,152 M200,232 L1280,232 M200,312 L1280,312 M200,392 L1280,392 M200,472 L1280,472 M200,552 L1280,552 M200,632 L1280,632 M200,712 L1280,712 " fill="none" stroke="#243224" stroke-width="0.5" stroke-linecap="round"/>
+<line x1="740" y1="72" x2="740" y2="722" stroke="#2e3e2e" stroke-width="12"/>
+<line x1="200" y1="288" x2="1280" y2="288" stroke="#2e3e2e" stroke-width="8"/>
+<line x1="200" y1="505" x2="1280" y2="505" stroke="#283828" stroke-width="5"/>
+<circle cx="362" cy="234" r="12" fill="#4a90d9"/>
+<circle cx="362" cy="234" r="12" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.5"/>
+<text x="362" y="238" fill="#f0f0f0" font-size="8" text-anchor="middle" font-weight="bold" font-family="sans-serif">V</text>
+<circle cx="578" cy="364" r="12" fill="#ff9800"/>
+<circle cx="578" cy="364" r="12" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.5"/>
+<text x="578" y="368" fill="#f0f0f0" font-size="8" text-anchor="middle" font-weight="bold" font-family="sans-serif">V</text>
+<circle cx="794" cy="215" r="12" fill="#4a90d9"/>
+<circle cx="794" cy="215" r="12" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.5"/>
+<text x="794" y="219" fill="#f0f0f0" font-size="8" text-anchor="middle" font-weight="bold" font-family="sans-serif">V</text>
+<circle cx="977" cy="429" r="12" fill="#4caf50" opacity="0.15"/>
+<circle cx="977" cy="429" r="12" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.075"/>
+<text x="977" y="433" fill="#f0f0f0" font-size="8" text-anchor="middle" font-weight="bold" font-family="sans-serif">V</text>
+<circle cx="1150" cy="299" r="12" fill="#4a90d9" opacity="0.15"/>
+<circle cx="1150" cy="299" r="12" fill="none" stroke="#f0f0f0" stroke-width="1.5" opacity="0.075"/>
+<text x="1150" y="303" fill="#f0f0f0" font-size="8" text-anchor="middle" font-weight="bold" font-family="sans-serif">V</text>
+<rect x="764" y="130" width="190" height="75" fill="#21262d" rx="5" stroke="#4a90d9" stroke-width="1"/>
+<text x="774" y="148" fill="#f0f0f0" font-size="11" text-anchor="start" font-weight="bold" font-family="monospace">sample1.mp4</text>
+<text x="774" y="162" fill="#8b949e" font-size="10" text-anchor="start" font-weight="normal" font-family="monospace">2026-03-14 11:07</text>
+<text x="774" y="176" fill="#8b949e" font-size="10" text-anchor="start" font-weight="normal" font-family="monospace">1.7 KB  user-owned</text>
+<rect x="774" y="184" width="60" height="16" fill="#4a90d9" rx="3" stroke="none"/>
+<text x="804" y="196" fill="#f0f0f0" font-size="9" text-anchor="middle" font-weight="normal" font-family="sans-serif">Download</text>
+<line x1="794" y1="205" x2="794" y2="203" stroke="#4a90d9" stroke-width="1"/>
+<rect x="210" y="82" width="145" height="22" fill="#21262d" rx="4" stroke="#30363d" stroke-width="1"/>
+<text x="218" y="97" fill="#4a90d9" font-size="11" text-anchor="start" font-weight="normal" font-family="monospace">3 of 5 videos</text>
+<rect x="1240" y="82" width="26" height="26" fill="#21262d" rx="4" stroke="#30363d" stroke-width="1"/>
+<text x="1253" y="100" fill="#f0f0f0" font-size="14" text-anchor="middle" font-weight="bold" font-family="sans-serif">+</text>
+<rect x="1240" y="114" width="26" height="26" fill="#21262d" rx="4" stroke="#30363d" stroke-width="1"/>
+<text x="1253" y="132" fill="#f0f0f0" font-size="14" text-anchor="middle" font-weight="bold" font-family="sans-serif">-</text>
+<rect x="200" y="722" width="1080" height="50" fill="#111111" rx="0" stroke="none"/>
+<line x1="200" y1="722" x2="1280" y2="722" stroke="#30363d" stroke-width="1"/>
+<text x="212" y="752" fill="#8b949e" font-size="11" text-anchor="start" font-weight="normal" font-family="sans-serif">Timeline:</text>
+<rect x="290" y="743" width="950" height="6" fill="#30363d" rx="3" stroke="none"/>
+<rect x="290" y="743" width="570" height="6" fill="#4a90d9" rx="3" stroke="none"/>
+<circle cx="860" cy="746" r="8" fill="#4a90d9" stroke="#f0f0f0" stroke-width="1"/>
+<text x="860" y="766" fill="#8b949e" font-size="9" text-anchor="middle" font-weight="normal" font-family="monospace">2026-03-02 14:00</text>
+<rect x="290" y="726" width="40" height="16" fill="#30363d" rx="3" stroke="none"/>
+<text x="310" y="737" fill="#8b949e" font-size="9" text-anchor="middle" font-weight="normal" font-family="sans-serif">Hour</text>
+<rect x="336" y="726" width="40" height="16" fill="#3b82f6" rx="3" stroke="none"/>
+<text x="356" y="737" fill="#f0f0f0" font-size="9" text-anchor="middle" font-weight="normal" font-family="sans-serif">Day</text>
+<rect x="382" y="726" width="40" height="16" fill="#30363d" rx="3" stroke="none"/>
+<text x="402" y="737" fill="#8b949e" font-size="9" text-anchor="middle" font-weight="normal" font-family="sans-serif">Week</text>
+<rect x="428" y="726" width="40" height="16" fill="#30363d" rx="3" stroke="none"/>
+<text x="448" y="737" fill="#8b949e" font-size="9" text-anchor="middle" font-weight="normal" font-family="sans-serif">Month</text>
+<rect x="474" y="726" width="40" height="16" fill="#30363d" rx="3" stroke="none"/>
+<text x="494" y="737" fill="#8b949e" font-size="9" text-anchor="middle" font-weight="normal" font-family="sans-serif">Year</text>
+<rect x="0" y="772" width="1280" height="28" fill="#161b22" rx="0" stroke="none"/>
+<line x1="0" y1="772" x2="1280" y2="772" stroke="#30363d" stroke-width="1"/>
+<circle cx="16" cy="786" r="4" fill="#4caf50"/>
+<text x="26" y="790" fill="#8b949e" font-size="10" text-anchor="start" font-weight="normal" font-family="monospace">Plugin: video_hotspot v0.1.0 loaded  |  IComponent: com.logos.component.IComponent</text>
+<text x="1264" y="790" fill="#8b949e" font-size="10" text-anchor="end" font-weight="normal" font-family="monospace">libvideo_hotspot_plugin.so</text>
+</svg>

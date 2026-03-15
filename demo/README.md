@@ -131,6 +131,47 @@ bash demo/gen-voice.sh
 
 ---
 
+## Module-Embedded Demo (v2)
+
+The module-embedded demo shows Video Hotspot running **inside the Logos Basecamp
+app** as a loaded plugin, not standalone. A mock Basecamp shell wraps every screen
+with:
+
+- **Title bar** — "Logos Basecamp" window chrome
+- **Sidebar** — MODULES list (Video Hotspot active, plus Chat/Wallet/Browser/Settings),
+  NETWORK status (Waku/Codex/Nomos)
+- **Footer** — `Plugin: video_hotspot v0.1.0 loaded | IComponent: com.logos.component.IComponent`
+
+### Files
+
+| File | Description |
+|------|-------------|
+| `demo-module.mp4` | 25s video showing all screens inside the Basecamp shell |
+| `snapshot_01_launch.png` | Basecamp shell with Video Hotspot loading (Settings view) |
+| `snapshot_02_map.png` | Map view with 5 geo pins, timeline slider at 60% |
+| `snapshot_03_timeline.png` | Map view with timeline slider at 35% (fewer pins visible) |
+| `snapshot_04_upload.png` | Upload queue with 5 items, DUPLICATE badge |
+| `snapshot_05_plugin_loaded.png` | Settings screen with plugin status |
+| `FURPS_VERIFICATION.md` | Full FURPS+ checklist verified against demo |
+
+### How it was generated
+
+The mock shell is a Python SVG generator (`logos-shell-mock/run_demo.py`) that wraps
+the existing screen content in a Basecamp frame. No Qt or live app is needed.
+
+```bash
+python3 demo/logos-shell-mock/run_demo.py
+```
+
+Pipeline: Python SVG → `rsvg-convert` PNGs → `ffmpeg` segments → concat → `demo-module.mp4`
+
+### FURPS Verification
+
+See [`FURPS_VERIFICATION.md`](FURPS_VERIFICATION.md) for a full walkthrough of every
+FURPS+ spec item, marked as DEMONSTRATED / PARTIAL / NOT SHOWN with timestamps.
+
+---
+
 ## Demo Script
 
 `record-cli.sh` drives the CLI demo session. It wipes the local DB before

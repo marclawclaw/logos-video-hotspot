@@ -105,6 +105,17 @@ development without a running Logos node. See `VideoHotspotPlugin.cpp` for the
 > ./build/ui/app/video-hotspot-app
 > ```
 
+### Module-Embedded Demo
+
+**[▶ demo-module.mp4](demo/demo-module.mp4)** — Video Hotspot shown as a loaded module inside the Logos Basecamp shell
+
+Shows the plugin embedded in a mock Basecamp frame with sidebar navigation,
+network status (Waku/Codex/Nomos), and plugin footer (`libvideo_hotspot_plugin.so`).
+
+Snapshots: [launch](demo/snapshot_01_launch.png) · [map](demo/snapshot_02_map.png) · [timeline](demo/snapshot_03_timeline.png) · [upload](demo/snapshot_04_upload.png) · [plugin loaded](demo/snapshot_05_plugin_loaded.png)
+
+See [`demo/FURPS_VERIFICATION.md`](demo/FURPS_VERIFICATION.md) for full FURPS+ spec verification against the demo.
+
 ---
 
 ## Quick Start
