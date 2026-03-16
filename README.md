@@ -73,7 +73,7 @@ mkdir -p "$PLUGIN_DIR"
 cp build/ui/plugin/video_hotspot.so "$PLUGIN_DIR/"
 ```
 
-Or use the CMake install target (installs to `~/.local/share/LogosAppNix/plugins/`):
+Or use the CMake install target (installs to `~/.local/share/Logos/LogosAppNix/plugins/`):
 
 ```bash
 cmake --install build --prefix "$HOME/.local"
@@ -163,6 +163,32 @@ See [`demo/FURPS_VERIFICATION.md`](demo/FURPS_VERIFICATION.md) for full FURPS+ s
 ---
 
 ## Quick Start
+
+## Building Against Logos-App Qt (Nix Qt 6.9.2)
+
+logos-app ships its own Qt 6.9.2 via Nix. You **must** build the plugin against
+that exact Qt — system Qt will cause ABI mismatches and link errors.
+
+Use the helper script to build with the Nix-provided Qt:
+
+```bash
+# Edit scripts/build-with-nix-qt.sh and replace <hash> placeholders
+# with the real Nix store hashes from your logos-app wrapper
+bash scripts/build-with-nix-qt.sh
+```
+
+Or configure manually:
+
+```bash
+export NIX_QT_PREFIX="/nix/store/<hash>-qtbase-6.9.2"
+cmake -B build -DBUILD_UI_PLUGIN=ON -DBUILD_WITH_NIX_QT=ON
+cmake --build build --target video_hotspot
+```
+
+To find the correct Nix store hash, inspect the logos-app wrapper script
+(e.g. `cat $(which logos-app)`) and look for the `qtbase-6.9.2` path.
+
+---
 
 ### Prerequisites
 
