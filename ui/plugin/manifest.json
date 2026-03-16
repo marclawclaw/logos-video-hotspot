@@ -1,0 +1,14 @@
+{
+  "author": "marclawclaw",
+  "category": "media",
+  "dependencies": ["codex", "waku"],
+  "description": "Decentralised video upload, geotagging, and map browsing via Logos stack",
+  "icon": "",
+  "main": {
+    "linux-amd64": "video_hotspot.so"
+  },
+  "manifestVersion": "0.1.0",
+  "name": "video_hotspot",
+  "type": "ui",
+  "version": "0.2.0"
+}

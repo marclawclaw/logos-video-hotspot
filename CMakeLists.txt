@@ -12,6 +12,21 @@ set(CMAKE_AUTORCC ON)
 option(BUILD_UI_PLUGIN "Build the IComponent UI plugin for logos-app" OFF)
 option(BUILD_UI_APP    "Build the standalone demo app" OFF)
 option(BUILD_TESTS     "Build unit and e2e tests" ON)
+option(BUILD_WITH_NIX_QT "Use Nix-provided Qt 6.9.2 from logos-app" OFF)
+
+# ---------------------------------------------------------------------------
+# Nix Qt support (logos-app ships Qt 6.9.2 via Nix)
+# ---------------------------------------------------------------------------
+if(BUILD_WITH_NIX_QT)
+    if(DEFINED ENV{NIX_QT_PREFIX})
+        list(INSERT CMAKE_PREFIX_PATH 0 "$ENV{NIX_QT_PREFIX}")
+        message(STATUS "Nix Qt: prepending NIX_QT_PREFIX=$ENV{NIX_QT_PREFIX} to CMAKE_PREFIX_PATH")
+    else()
+        message(FATAL_ERROR
+            "BUILD_WITH_NIX_QT is ON but NIX_QT_PREFIX is not set. "
+            "Export NIX_QT_PREFIX=/nix/store/<hash>-qtbase-6.9.2 before configuring.")
+    endif()
+endif()
 
 set(LOGOS_CPP_SDK_ROOT  "" CACHE PATH "Path to logos-cpp-sdk checkout")
 set(LOGOS_LIBLOGOS_ROOT "" CACHE PATH "Path to logos-liblogos checkout")
