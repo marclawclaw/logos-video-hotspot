@@ -198,7 +198,7 @@
 ### Basecamp Integration
 | Item | Status | Notes |
 |------|--------|-------|
-| Runs as Qt miniapp inside Basecamp | ✅ DEMONSTRATED | Correct `IComponent` from `logos-co/logos-app`; loads from `~/.local/share/LogosAppNix/plugins/video_hotspot/video_hotspot.so` |
+| Runs as Qt miniapp inside Basecamp | ✅ DEMONSTRATED | Correct `IComponent` from `logos-co/logos-app`; loads from `~/.local/share/Logos/LogosAppNix/plugins/video_hotspot/video_hotspot.so` |
 | Inherits Basecamp platform support | ✅ INTEGRATED | CMakeLists installs to correct logos-app plugin path; `PREFIX ""` matches logos-app resolvePlugin() convention |
 | Uses Basecamp's Logos stack connections | ✅ INTEGRATED | `StorageClient::initLogos()` + `MessagingClient::initLogos()` called in `createWidget(logosAPI)` — real calls active when logos-app passes non-null LogosAPI* |
 
@@ -237,7 +237,8 @@ Real integration highlights (v0.2.0):
 - `StorageClient::initLogos(LogosAPI*)` → real Codex storage when logos-app provides LogosAPI
 - `MessagingClient::initLogos(LogosAPI*)` → real Waku messaging when logos-app provides LogosAPI
 - Plugin output name fixed to `video_hotspot.so` matching logos-app `resolvePlugin()` convention
-- CMake install target places plugin in `~/.local/share/LogosAppNix/plugins/video_hotspot/`
+- CMake install target places plugin in `~/.local/share/Logos/LogosAppNix/plugins/video_hotspot/` (installs `video_hotspot.so` + `manifest.json`)
+- `manifest.json` shipped in `ui/plugin/` — enables logos-app plugin discovery and declares `codex`/`waku` dependencies
 - `.gitmodules` added for `logos-co/logos-cpp-sdk` and `logos-co/logos-liblogos` submodules
 
 Remaining "not shown" items are either blocked on LEZ program layer (blockchain indexing)

@@ -12,7 +12,8 @@
 
 Video Hotspot is a real [`logos-co/logos-app`](https://github.com/logos-co/logos-app)
 plugin implementing the `IComponent` interface (`com.logos.component.IComponent`).
-logos-app loads UI plugins via `QPluginLoader` from its plugins directory.
+logos-app discovers plugins via `manifest.json` (included in `ui/plugin/`) and
+loads them via `QPluginLoader` from the plugin directory.
 
 ### Integration architecture
 
@@ -61,22 +62,28 @@ cmake --build build --target video_hotspot
 
 ### 3 — Install into the logos-app plugin directory
 
+Both `video_hotspot.so` and `manifest.json` must be present in the plugin directory —
+logos-app uses `manifest.json` for plugin discovery and dependency resolution.
+
 ```bash
 # Non-portable build (default logos-app):
-PLUGIN_DIR="$HOME/.local/share/LogosAppNix/plugins/video_hotspot"
+PLUGIN_DIR="$HOME/.local/share/Logos/LogosAppNix/plugins/video_hotspot"
 mkdir -p "$PLUGIN_DIR"
 cp build/ui/plugin/video_hotspot.so "$PLUGIN_DIR/"
+cp ui/plugin/manifest.json "$PLUGIN_DIR/"
 
 # Portable build (logos-app with LOGOS_PORTABLE_BUILD):
 PLUGIN_DIR="$HOME/.local/share/LogosApp/plugins/video_hotspot"
 mkdir -p "$PLUGIN_DIR"
 cp build/ui/plugin/video_hotspot.so "$PLUGIN_DIR/"
+cp ui/plugin/manifest.json "$PLUGIN_DIR/"
 ```
 
-Or use the CMake install target (installs to `~/.local/share/Logos/LogosAppNix/plugins/`):
+Or use the CMake install target (installs both `.so` and `manifest.json`):
 
 ```bash
 cmake --install build --prefix "$HOME/.local"
+# Installs to ~/.local/share/Logos/LogosAppNix/plugins/video_hotspot/
 ```
 
 ### 4 — Launch logos-app
@@ -164,32 +171,6 @@ See [`demo/FURPS_VERIFICATION.md`](demo/FURPS_VERIFICATION.md) for full FURPS+ s
 
 ## Quick Start
 
-## Building Against Logos-App Qt (Nix Qt 6.9.2)
-
-logos-app ships its own Qt 6.9.2 via Nix. You **must** build the plugin against
-that exact Qt — system Qt will cause ABI mismatches and link errors.
-
-Use the helper script to build with the Nix-provided Qt:
-
-```bash
-# Edit scripts/build-with-nix-qt.sh and replace <hash> placeholders
-# with the real Nix store hashes from your logos-app wrapper
-bash scripts/build-with-nix-qt.sh
-```
-
-Or configure manually:
-
-```bash
-export NIX_QT_PREFIX="/nix/store/<hash>-qtbase-6.9.2"
-cmake -B build -DBUILD_UI_PLUGIN=ON -DBUILD_WITH_NIX_QT=ON
-cmake --build build --target video_hotspot
-```
-
-To find the correct Nix store hash, inspect the logos-app wrapper script
-(e.g. `cat $(which logos-app)`) and look for the `qtbase-6.9.2` path.
-
----
-
 ### Prerequisites
 
 - Qt 6 (Core, Concurrent, Network, Sql)
@@ -208,6 +189,29 @@ cmake --build build
 ```
 
 The CLI binary lands at `build/cli/video-hotspot`.
+
+### Building the UI Plugin Against Logos-App Qt (Nix Qt 6.9.2)
+
+logos-app ships its own Qt 6.9.2 via Nix. When building `BUILD_UI_PLUGIN=ON`,
+you **must** build against that exact Qt — system Qt causes ABI mismatches and
+link errors at runtime.
+
+Use the helper script (edit it first to replace `<hash>` placeholders):
+
+```bash
+# Find the correct Nix store hash:
+#   cat $(which logos-app) | grep qtbase
+# Then edit scripts/build-with-nix-qt.sh and update the hash
+bash scripts/build-with-nix-qt.sh
+```
+
+Or configure manually:
+
+```bash
+export NIX_QT_PREFIX="/nix/store/<hash>-qtbase-6.9.2"
+cmake -B build -DBUILD_UI_PLUGIN=ON -DBUILD_WITH_NIX_QT=ON
+cmake --build build --target video_hotspot
+```
 
 ### CLI Usage
 
@@ -611,7 +615,7 @@ Manage local video storage:
 - [ ] Inherits Basecamp's platform support (Windows 10+, macOS 11+, Linux)
 - [ ] Uses Basecamp's Logos stack connections (Messaging, Storage, Blockchain)
 
-> **Note:** Plugin interface (`IComponent`) is implemented and the `.so` builds. Actual Basecamp wiring (`createWidget(logosAPI)` → real SDK) is marked TODO in `VideoHotspotPlugin.cpp` pending a live Basecamp binary.
+> **Note:** Plugin interface (`IComponent`) is implemented, `manifest.json` is shipped alongside the `.so` (enabling logos-app discovery), and the plugin builds cleanly. Actual Basecamp wiring (`createWidget(logosAPI)` → real SDK) is marked TODO in `VideoHotspotPlugin.cpp` pending a live Basecamp binary.
 
 #### Logos Stack Dependencies
 - [ ] **Logos Messaging** — Real-time indexing
