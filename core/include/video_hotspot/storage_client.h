@@ -120,19 +120,32 @@ public:
 
     /**
      * Return the list of all locally cached entries.
+     * QML can call this directly via Q_INVOKABLE.
      */
-    QList<CacheEntry> cachedEntries() const;
+    Q_INVOKABLE QList<CacheEntry> cachedEntries() const;
 
     /**
      * Return current storage statistics.
+     * QML can call this directly via Q_INVOKABLE.
      */
-    StorageStats stats() const;
+    Q_INVOKABLE StorageStats stats() const;
+
+    /// QML-accessible individual stat accessors
+    Q_INVOKABLE qint64 statsAllocatedBytes() const;
+    Q_INVOKABLE qint64 statsUserOwnedBytes() const;
+    Q_INVOKABLE qint64 statsCachedBytes() const;
+    Q_INVOKABLE qint64 statsTotalUsedBytes() const;
+
+    /// QML-friendly cache entry accessors (returns QVariantList of QVariantMap)
+    Q_INVOKABLE int cachedEntriesCount() const;
+    Q_INVOKABLE QVariantMap cachedEntryAt(int index) const;
+    Q_INVOKABLE QVariantList cachedEntriesVariantList() const;
 
     /**
      * Set the user-configured storage allocation limit (bytes).
      * Triggers autoEvict if current usage exceeds the new limit.
      */
-    void setStorageLimit(qint64 bytes);
+    Q_INVOKABLE void setStorageLimit(qint64 bytes);
 
     /// Returns true when connected to real Logos Codex storage.
     bool isLogosConnected() const;

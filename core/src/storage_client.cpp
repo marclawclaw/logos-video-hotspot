@@ -25,6 +25,8 @@
 
 #include <QDebug>
 
+#include <QVariantMap>
+#include <QVariantList>
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
@@ -403,6 +405,43 @@ void StorageClient::setStorageLimit(qint64 bytes)
     if (s.totalUsedBytes() > bytes) {
         autoEvict(bytes);
     }
+}
+
+qint64 StorageClient::statsAllocatedBytes() const { return stats().allocatedBytes; }
+qint64 StorageClient::statsUserOwnedBytes() const { return stats().userOwnedBytes; }
+qint64 StorageClient::statsCachedBytes() const { return stats().cachedBytes; }
+qint64 StorageClient::statsTotalUsedBytes() const { return stats().totalUsedBytes(); }
+
+int StorageClient::cachedEntriesCount() const
+{
+    return cachedEntries().size();
+}
+
+QVariantMap StorageClient::cachedEntryAt(int index) const
+{
+    const auto entries = cachedEntries();
+    if (index < 0 || index >= entries.size()) return {};
+    const CacheEntry& e = entries.at(index);
+    QVariantMap m;
+    m["cid"]       = e.cid;
+    m["localPath"] = e.localPath;
+    m["sizeBytes"] = e.sizeBytes;
+    m["userOwned"] = e.userOwned;
+    return m;
+}
+
+QVariantList StorageClient::cachedEntriesVariantList() const
+{
+    QVariantList result;
+    for (const CacheEntry& e : cachedEntries()) {
+        QVariantMap m;
+        m["cid"]       = e.cid;
+        m["localPath"] = e.localPath;
+        m["sizeBytes"] = e.sizeBytes;
+        m["userOwned"] = e.userOwned;
+        result.append(m);
+    }
+    return result;
 }
 
 }  // namespace VideoHotspot

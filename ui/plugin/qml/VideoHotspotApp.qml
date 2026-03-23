@@ -13,6 +13,15 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.15
 
+// Helper to format bytes as human-readable string
+function formatBytes(bytes) {
+    if (bytes < 0) bytes = 0
+    if (bytes < 1024) return bytes + " B"
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB"
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + " MB"
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + " GB"
+}
+
 Rectangle {
     id: root
     color: "#1a1a1a"
@@ -577,26 +586,124 @@ Rectangle {
             // ══ 2 — Downloads/Cache Screen ═════════════════════════════════
             Rectangle {
                 color: "#1a1a1a"
+
+                // ListModel populated from StorageClient::cachedEntries() via QML
+                ListModel { id: cachedVideosModel }
+
+                // Load cached entries from core on component ready
+                Component.onCompleted: refreshCachedVideos()
+
+                function refreshCachedVideos() {
+                    cachedVideosModel.clear()
+                    if (typeof storageClient !== "undefined" && storageClient) {
+                        var entries = storageClient.cachedEntriesVariantList()
+                        for (var i = 0; i < entries.length; i++) {
+                            var e = entries[i]
+                            var filename = e.localPath ? e.localPath.split("/").pop() : e.cid
+                            cachedVideosModel.append({
+                                "filename": filename,
+                                "cid": e.cid,
+                                "sizeBytes": e.sizeBytes,
+                                "sizeLabel": formatBytes(e.sizeBytes),
+                                "userOwned": e.userOwned
+                            })
+                        }
+                    }
+                }
+
+                // Listen for storage changes to refresh the list
+                Connections {
+                    target: storageClient
+                    function onStorageStatsChanged() { refreshCachedVideos() }
+                    function onDownloadComplete(cid, localPath) { refreshCachedVideos() }
+                    function onUploadComplete(filePath, cid) { refreshCachedVideos() }
+                }
+
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: 24
                     spacing: 16
+
                     Text { text: "Downloads & Cache"; color: "#f0f0f0"; font.pixelSize: 20; font.bold: true }
-                    Text { text: "Storage: 1.2 GB of 10 GB used"; color: "#aaaaaa"; font.pixelSize: 13 }
-                    Rectangle {
-                        Layout.fillWidth: true; height: 12; radius: 6; color: "#333333"
-                        Rectangle { width: parent.width * 0.12; height: parent.height; radius: 6; color: "#4a90d9" }
+
+                    // Real storage stats from StorageClient
+                    property real storageUsed: (typeof storageClient !== "undefined" && storageClient)
+                        ? storageClient.statsTotalUsedBytes() : 0
+                    property real storageAllocated: (typeof storageClient !== "undefined" && storageClient)
+                        ? (storageClient.statsAllocatedBytes() > 0 ? storageClient.statsAllocatedBytes() : 10 * 1024 * 1024 * 1024)
+                        : 10 * 1024 * 1024 * 1024
+                    property real storagePct: storageAllocated > 0 ? (storageUsed / storageAllocated) : 0
+
+                    Text {
+                        text: "Storage: " + formatBytes(storageUsed) + " of " + formatBytes(storageAllocated) + " used"
+                        color: "#aaaaaa"
+                        font.pixelSize: 13
                     }
-                    Text { text: "Your Videos (3)"; color: "#aaaaaa"; font.pixelSize: 13; font.bold: true }
-                    Repeater {
-                        model: ["sample-event.mp4 — 2.3 MB  ✓ Owned",
-                                "march-footage.mp4 — 8.1 MB  ✓ Owned",
-                                "clip-b.mp4 — 4.5 MB  ✓ Owned"]
+
+                    Rectangle {
+                        id: storageBar
+                        Layout.fillWidth: true; height: 12; radius: 6; color: "#333333"
                         Rectangle {
-                            Layout.fillWidth: true; height: 44; color: "#2a2a2a"; radius: 6
-                            Text { anchors.centerIn: parent; text: modelData; color: "#f0f0f0"; font.pixelSize: 12 }
+                            width: storageBar.parent ? storageBar.parent.storagePct * storageBar.width : 0
+                            height: parent.height; radius: 6; color: "#4a90d9"
+                            Behavior on width { NumberAnimation { duration: 200 } }
                         }
                     }
+
+                    Text {
+                        text: "Your Videos (" + cachedVideosModel.count + ")"
+                        color: "#aaaaaa"; font.pixelSize: 13; font.bold: true
+                    }
+
+                    Rectangle {
+                        visible: cachedVideosModel.count === 0
+                        Layout.fillWidth: true; height: 60; color: "#222222"; radius: 6
+                        Text {
+                            anchors.centerIn: parent
+                            text: "No videos cached — upload videos to see them here"
+                            color: "#666666"; font.pixelSize: 12
+                        }
+                    }
+
+                    ListView {
+                        visible: cachedVideosModel.count > 0
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        model: cachedVideosModel
+                        spacing: 6
+                        clip: true
+
+                        delegate: Rectangle {
+                            width: parent ? parent.width : 0
+                            height: 48
+                            color: "#2a2a2a"; radius: 6
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 12
+                                spacing: 10
+
+                                Text {
+                                    text: model.userOwned ? "✓" : "⬇"
+                                    color: model.userOwned ? "#44cc44" : "#4a90d9"
+                                    font.pixelSize: 14
+                                }
+
+                                Text {
+                                    text: model.filename
+                                    color: "#f0f0f0"; font.pixelSize: 12
+                                    elide: Text.ElideMiddle
+                                    Layout.fillWidth: true
+                                }
+
+                                Text {
+                                    text: model.sizeLabel + (model.userOwned ? "  ✓ Owned" : "  ⎋ Cached")
+                                    color: "#aaaaaa"; font.pixelSize: 11
+                                }
+                            }
+                        }
+                    }
+
                     Item { Layout.fillHeight: true }
                 }
             }
@@ -604,19 +711,73 @@ Rectangle {
             // ══ 3 — Settings Screen ════════════════════════════════════════
             Rectangle {
                 color: "#1a1a1a"
+
+                // Refresh settings display when storage stats change
+                Connections {
+                    target: storageClient
+                    function onStorageStatsChanged() { settingsLoader.update() }
+                }
+
+                Component {
+                    id: settingsLoader
+                    function update() {
+                        // Force binding recomputation by touching slider
+                        storageSlider.valueChanged(storageSlider.value)
+                    }
+                }
+
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: 24
                     spacing: 20
                     Text { text: "Settings"; color: "#f0f0f0"; font.pixelSize: 20; font.bold: true }
+
+                    // Real storage stats from StorageClient
+                    property real storedAllocated: (typeof storageClient !== "undefined" && storageClient)
+                        ? storageClient.statsAllocatedBytes() : 0
+                    property real storedUsed: (typeof storageClient !== "undefined" && storageClient)
+                        ? storageClient.statsTotalUsedBytes() : 0
+
                     RowLayout {
                         Text { text: "Storage limit:"; color: "#aaaaaa"; font.pixelSize: 13; Layout.preferredWidth: 160 }
                         Slider {
                             id: storageSlider
-                            from: 1; to: 50; value: 10; Layout.fillWidth: true
+                            from: 1; to: 50
+                            // Initialise from core if a limit has been set, else default 10 GB
+                            value: parent.parent.storedAllocated > 0
+                                   ? (parent.parent.storedAllocated / (1024 * 1024 * 1024))
+                                   : 10
+                            Layout.fillWidth: true
+                            onMoved: {
+                                var limitBytes = Math.round(value) * 1024 * 1024 * 1024
+                                if (typeof storageClient !== "undefined" && storageClient)
+                                    storageClient.setStorageLimit(limitBytes)
+                            }
                         }
-                        Text { text: Math.round(storageSlider.value) + " GB"; color: "#4a90d9"; font.pixelSize: 13 }
+                        Text {
+                            text: {
+                                var currentGiB = parent.parent.storedAllocated > 0
+                                      ? (parent.parent.storedAllocated / (1024 * 1024 * 1024)).toFixed(0)
+                                      : Math.round(storageSlider.value)
+                                return currentGiB + " GB"
+                            }
+                            color: "#4a90d9"; font.pixelSize: 13
+                        }
                     }
+
+                    // Real storage usage breakdown
+                    RowLayout {
+                        visible: parent.parent.storedUsed > 0
+                        Text {
+                            text: "Used: " + formatBytes(parent.parent.storedUsed)
+                                  + "  (owned: " + formatBytes((typeof storageClient !== "undefined" && storageClient) ? storageClient.statsUserOwnedBytes() : 0)
+                                  + ", cached: " + formatBytes((typeof storageClient !== "undefined" && storageClient) ? storageClient.statsCachedBytes() : 0) + ")"
+                            color: "#aaaaaa"; font.pixelSize: 11
+                        }
+                    }
+
+                    Rectangle { Layout.fillWidth: true; height: 1; color: "#333333" }
+
                     RowLayout {
                         Text { text: "Monitor folder:"; color: "#aaaaaa"; font.pixelSize: 13; Layout.preferredWidth: 160 }
                         Text { text: "~/Videos/Hotspot"; color: "#f0f0f0"; font.pixelSize: 13 }
@@ -625,7 +786,7 @@ Rectangle {
                             text: "Change"
                             background: Rectangle { color: "#3a3a3a"; radius: 4 }
                             contentItem: Text { text: parent.text; color: "#f0f0f0"; horizontalAlignment: Text.AlignHCenter }
-                            onClicked: { /* mock */ }
+                            onClicked: { /* TODO: real folder picker */ }
                         }
                     }
                     RowLayout {
@@ -634,7 +795,13 @@ Rectangle {
                     }
                     RowLayout {
                         Text { text: "Logos node:"; color: "#aaaaaa"; font.pixelSize: 13; Layout.preferredWidth: 160 }
-                        Text { text: "● connected (mock)"; color: "#44cc44"; font.pixelSize: 13 }
+                        Text {
+                            text: (typeof logosConnected !== "undefined" && logosConnected)
+                                  ? "● connected (Logos)"
+                                  : "● connected (mock)"
+                            color: (typeof logosConnected !== "undefined" && logosConnected) ? "#44cc44" : "#44cc44"
+                            font.pixelSize: 13
+                        }
                     }
                     Item { Layout.fillHeight: true }
                 }
