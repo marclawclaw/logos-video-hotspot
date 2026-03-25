@@ -1,0 +1,30 @@
+name: video_hotspot
+version: 0.2.0
+type: ui
+category: media
+description: "Privacy-preserving video upload and geolocation-based event mapping on the Logos stack"
+
+# Runtime Logos module dependencies (resolved by logos-basecamp / logoscore)
+dependencies:
+  - codex
+  - waku
+
+nix_packages:
+  build: []
+  runtime: []
+
+external_libraries: []
+
+cmake:
+  find_packages:
+    - Qt6 COMPONENTS Core Gui Widgets Quick QuickWidgets Positioning REQUIRED
+  extra_sources:
+    - core/storage_client.cpp
+    - core/messaging_client.cpp
+    - ui/plugin/video_hotspot_plugin.cpp
+  extra_include_dirs:
+    - core
+    - ui/plugin
+    - vendor/logos-cpp-sdk/include
+    - vendor/logos-liblogos/include
+  extra_link_libraries: []
